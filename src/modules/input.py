@@ -8,7 +8,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.key_binding import KeyBindings
-
+from prompt_toolkit.styles import Style
 
 def get_help():
     return """
@@ -17,7 +17,6 @@ Available commands:
 /e or /exit - Exit the program
 /q or /quit - Exit the program
 """
-
 
 def get_user_input():
     prompt = f"{USER_NAME}> "
@@ -34,6 +33,11 @@ def get_user_input():
         " Pressing Ctrl-C or Ctrl-D will exit the user interface. "
         event.app.exit()
 
+    # Define the style for the prompt
+    style = Style.from_dict({
+        'prompt': 'ansigreen bold',
+    })
+
     session = PromptSession(
         history=FileHistory(history_file),
         auto_suggest=AutoSuggestFromHistory(),
@@ -41,11 +45,13 @@ def get_user_input():
         complete_while_typing=True,
         enable_history_search=True,
         vi_mode=True,
-        key_bindings=kb
+        key_bindings=kb,
+        style=style,  # Add the style to the PromptSession
+        message=[('class:prompt', prompt)]  # Use the styled prompt
     )
 
     try:
-        user_input = session.prompt(prompt)
+        user_input = session.prompt()
 
         if user_input.lower() in ['/e', '/exit', '/q', '/quit']:
             print("Exiting program.")
@@ -62,7 +68,6 @@ def get_user_input():
     except EOFError:
         print("\nEOF detected. Exiting program.")
         return None
-
 
 # Example usage
 if __name__ == "__main__":
