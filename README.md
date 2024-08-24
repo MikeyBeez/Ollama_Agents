@@ -1,70 +1,63 @@
-# 🤖 AI_Functions
+# 🌈 AI_Functions: Your Personal AI Assistant Builder 🤖
 
-Build Your Own AI Agent from Libraries of Functions! 🛠️
+Welcome to the magical world of AI_Functions! 🎉 This repository is your ticket to creating a spectacular AI agent using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
 
-## 🌟 Overview
+## 🚀 What's New?
 
-Welcome to AI_Functions! 🎉 This repository is your treasure trove of modular functions designed to create a spectacular AI agent for Ollama. By organizing these functions into separate modules, we're providing you with a LEGO-like 🧱 framework for building your dream AI assistant!
+- 🎨 Colorful command-line interface
+- 🧠 Enhanced memory management
+- 🔍 Integrated DuckDuckGo search capabilities
+- 🛠️ Modular design for easy customization
 
-## 🔧 Configuration
+## 🌟 Key Features
 
-Personalize your AI buddy by tweaking the `config.py` file. Want to name your AI agent "Jarvis" or "Friday"? Go ahead! Open `config.py` and let your imagination run wild! 🌈
+1. **📚 Modular Architecture**: Each function is a separate module, making it easy to add, remove, or modify features.
+2. **💬 Interactive CLI**: Built with `prompt_toolkit` for a sci-fi movie-worthy experience!
+3. **🔐 Secure Configuration**: Customize your AI's personality in `config.py`.
+4. **🧪 Comprehensive Testing**: Because quality is our superpower!
+5. **🌐 Web Search Integration**: Your AI can now search the web using DuckDuckGo.
+6. **📜 Chat History**: Never forget a conversation with built-in history management.
+
+## 🛠️ Getting Started
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/AI_Functions.git
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Customize your AI in `config.py`.
+4. Run the main script:
+   ```bash
+   python src/main.py
+   ```
 
 ## 🧪 Running Tests
 
-Quality is our middle name! 💪 To ensure your AI agent is in tip-top shape, we've included a comprehensive test suite. Here's how to run it:
+Ensure your AI is in top shape:
 
-1. 🏃‍♂️ Sprint to your project root directory in the terminal.
-2. 🚀 Launch the tests with this cosmic command:
+```bash
+python -m unittest discover src/tests
+```
 
-   ```bash
-   python -m unittest discover src/tests
-   ```
+## 📘 Module Documentation
 
-Watch in awe as it automatically discovers and runs all test files in the `src/tests` directory! 🎭
-
-## 🔑 Key Features
-
-### 🎤 Input Module (`input.py`)
-
-The `input.py` file is the rockstar 🎸 of our AI agent. It's got more features than a Swiss Army knife:
-
-1. **Flexible Input Handling**: Using `prompt_toolkit`, it creates a command-line interface so cool, you'll think you're in a sci-fi movie! 🖥️
-
-2. **Command Recognition**: It understands special commands like '/help', '/exit', and '/quit'. It's like it can read your mind! 🧠
-
-3. **Error Handling**: Keyboard interrupts? EOF conditions? Ha! This module eats those for breakfast. 🍳
-
-4. **Help Function**: Lost? No worries! Our built-in help function is like a friendly tour guide for your AI journey. 🗺️
+- [Input Module](docs/input_module.md)
+- [Ollama Client](docs/ollama_client.md)
+- [Assemble Module](docs/assemble_module.md)
+- [Banner Module](docs/banner_module.md)
+- [DuckDuckGo Search](docs/ddg_search_module.md)
 
 ## 🤝 Contributing
 
-We love new ideas! 💡 If you've got a cool module or an awesome improvement, don't be shy! Submit a pull request or open an issue. Let's build the future of AI together! 🌠
+Got ideas? We love them! 💡 Submit a pull request or open an issue. Let's build the future of AI together!
 
 ## 📜 License
 
-MIT License
-
-Copyright (c) [year] [fullname]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-Built with ❤️ by the AI_Functions team. Let's make AI magic happen! ✨
+Built with ❤️ and ☕ by the AI_Functions team. Let's make AI magic happen! ✨
