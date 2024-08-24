@@ -2,6 +2,23 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
+from config import MEMORY_LEGNTH  # Note: There's a typo in the config, it should be MEMORY_LENGTH
+
+class ChatHistory:
+    def __init__(self, max_length):
+        self.max_length = max_length
+        self.history = []
+
+    def add_entry(self, entry):
+        self.history.append(entry)
+        if len(self.history) > self.max_length:
+            self.history.pop(0)
+
+    def get_history(self):
+        return self.history
+
+# Create a singleton instance of ChatHistory
+chat_history = ChatHistory(MEMORY_LEGNTH)
 
 def save_interaction(prompt, response, username, model_name):
     # Create the data directory if it doesn't exist
@@ -20,9 +37,6 @@ def save_interaction(prompt, response, username, model_name):
         "model_name": model_name,
         "prompt": prompt,
         "response": response,
-        # Additional fields can be added here in the future
-        # "chat_name": "",
-        # "tool_results": [],
     }
 
     # Save the data as a JSON file
@@ -30,5 +44,8 @@ def save_interaction(prompt, response, username, model_name):
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-#    print(f"Interaction saved to {file_path}")
+    # Add the entry to the chat history
+    chat_history.add_entry(data)
 
+def get_chat_history():
+    return chat_history.get_history()
