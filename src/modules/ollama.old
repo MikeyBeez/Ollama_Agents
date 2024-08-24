@@ -1,36 +1,16 @@
 import requests
 import json
 import logging
-import shutil
 from typing import Callable
 from rich.console import Console
-from rich.live import Live
-from rich.text import Text
 from .save_history import save_interaction
 
 logger = logging.getLogger(__name__)
-
-class TextStreamer:
-    def __init__(self, width):
-        self.width = width
-        self.current_line = ""
-        self.lines = []
-
-    def add_text(self, text):
-        if len(self.current_line) + len(text) > self.width:
-            self.lines.append(self.current_line)
-            self.current_line = text
-        else:
-            self.current_line += text
-
-    def get_output(self):
-        return Text("\n".join(self.lines + [self.current_line]))
 
 class OllamaClient:
     def __init__(self, base_url="http://localhost:11434"):
         self.base_url = base_url
         self.console = Console()
-        self.width = shutil.get_terminal_size().columns
         logger.info(f"OllamaClient initialized with base_url: {base_url}")
 
     def process_prompt(self, prompt: str, model: str, username: str):
@@ -43,19 +23,15 @@ class OllamaClient:
             with requests.post(url, headers=headers, json=data, stream=True) as response:
                 if response.status_code == 200:
                     full_response = ""
-                    text_streamer = TextStreamer(self.width)
-
-                    with Live(Text(""), refresh_per_second=10) as live:
-                        for line in response.iter_lines():
-                            if line:
-                                json_response = json.loads(line)
-                                if "response" in json_response:
-                                    chunk = json_response["response"]
-                                    full_response += chunk
-                                    text_streamer.add_text(chunk)
-                                    live.update(text_streamer.get_output())
-                                if json_response.get("done", False):
-                                    break
+                    for line in response.iter_lines():
+                        if line:
+                            json_response = json.loads(line)
+                            if "response" in json_response:
+                                chunk = json_response["response"]
+                                full_response += chunk
+                                self.console.print(chunk, end="", style="yellow")
+                            if json_response.get("done", False):
+                                break
 
                     # Log and save the interaction
                     logger.info(f"Response generated for prompt: {prompt[:50]}...")
