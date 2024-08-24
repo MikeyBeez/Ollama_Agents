@@ -1,4 +1,3 @@
-# src/modules/input.py
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -9,20 +8,13 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
-
-def get_help():
-    return """
-Available commands:
-/h or /help - Show this help message
-/e or /exit - Exit the program
-/q or /quit - Exit the program
-"""
+from src.modules.slash_commands import handle_slash_command, SLASH_COMMANDS
 
 def get_user_input():
     prompt = f"{USER_NAME}> \n"
     history_file = os.path.expanduser("~/.input_history")
 
-    completer_words = ['/h', '/help', '/e', '/exit', '/q', '/quit']
+    completer_words = list(SLASH_COMMANDS.keys())
     completer = WordCompleter(completer_words, ignore_case=True)
 
     kb = KeyBindings()
@@ -46,19 +38,18 @@ def get_user_input():
         enable_history_search=True,
         vi_mode=True,
         key_bindings=kb,
-        style=style,  # Add the style to the PromptSession
-        message=[('class:prompt', prompt)]  # Use the styled prompt
+        style=style,
+        message=[('class:prompt', prompt)]
     )
 
     try:
         user_input = session.prompt()
 
-        if user_input.lower() in ['/e', '/exit', '/q', '/quit']:
-            print("Exiting program.")
-            return None
-        elif user_input.lower() in ['/h', '/help']:
-            print(get_help())
-            return 'CONTINUE'
+        if user_input.startswith('/'):
+            result = handle_slash_command(user_input)
+            if result == 'EXIT':
+                return None  # Exit the program
+            return 'CONTINUE'  # For all other slash commands, including /hi and /h
 
         return user_input
 
