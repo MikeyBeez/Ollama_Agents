@@ -37,8 +37,9 @@ def main():
 
             # Process the prompt with Ollama
             console.print(f"[bold blue]{AGENT_NAME}>[/bold blue] ", end="")
+            console.print()
             response = process_prompt(full_prompt, DEFAULT_MODEL, USER_NAME)
-            
+ 
             # Print the response in yellow
             console.print()  # New line after response
 

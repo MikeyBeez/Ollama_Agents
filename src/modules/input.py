@@ -19,7 +19,7 @@ Available commands:
 """
 
 def get_user_input():
-    prompt = f"{USER_NAME}> "
+    prompt = f"{USER_NAME}> \n"
     history_file = os.path.expanduser("~/.input_history")
 
     completer_words = ['/h', '/help', '/e', '/exit', '/q', '/quit']

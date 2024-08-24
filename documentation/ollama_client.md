@@ -1,77 +1,86 @@
-# ollama_client.py Documentation
+# 🤖 ollama_client.py Documentation
 
-## Overview
+## 🌟 Overview
 
-`ollama_client.py` is a Python module that provides a client interface for interacting with the Ollama language model service. It handles sending prompts to the model, receiving and processing the responses, and formatting the output for display in a terminal environment.
+`ollama_client.py` is your friendly neighborhood Python module that acts as a bridge between your application and the magical world of the Ollama language model service. It's like a translator that speaks both Python and AI! 🗣️💬
 
-## Key Components
+## 🧰 Key Components
 
-### Libraries Used
+### 📚 Libraries Used
 
-1. **requests**: Used for making HTTP requests to the Ollama API.
-2. **json**: Used for parsing JSON responses from the API.
-3. **logging**: Used for logging information and errors.
-4. **shutil**: Used to get the terminal size for text wrapping.
-5. **rich**: Used for enhanced console output, including live updating and text styling.
+1. **requests**: Our HTTP messenger 📬
+2. **json**: The data whisperer 🤫
+3. **logging**: Our trusty note-taker 📝
+4. **shutil**: The room measurer 📏
+5. **rich**: Our text beautifier ✨
 
-### Classes
+### 🏗️ Classes
 
 #### OllamaClient
 
-The main class that handles communication with the Ollama service.
+The maestro of our AI orchestra! 🎭
 
-- **Initialization**: Sets up the base URL for the Ollama API and initializes a Console object from the rich library.
-- **process_prompt**: The primary method for sending a prompt to the model and processing the response.
+- **Initialization**: Sets the stage for our AI performance.
+- **process_prompt**: The main act where the magic happens!
 
 #### TextStreamer
 
-A utility class for handling the streaming output of text from the model.
+Our text juggler extraordinaire! 🤹
 
-- **Initialization**: Sets up the initial state for streaming text, including the maximum width for text wrapping.
-- **add_text**: Processes incoming text, handling line wrapping and preserving original formatting.
-- **get_output**: Returns the current state of the processed text.
+- **Initialization**: Prepares for the text acrobatics.
+- **add_text**: Catches and arranges the flying words.
+- **get_output**: Presents the final text masterpiece.
 
-### Functions
+### 🛠️ Functions
 
 #### process_prompt
 
-A wrapper function that uses the default OllamaClient instance to process prompts.
+The ringmaster that keeps the show running smoothly! 🎪
 
-## Functionality
+## 🎭 Functionality
 
-1. **API Interaction**: The module sends POST requests to the Ollama API with the given prompt and model parameters.
+1. **API Interaction**: Sends messages to our AI friend.
+2. **Streaming Response**: Catches AI thoughts in real-time!
+3. **Text Formatting**: Makes AI speech look pretty.
+4. **Live Display**: Updates faster than you can say "AI"!
+5. **Error Handling**: Our safety net for when things go wobbly.
+6. **Logging**: Keeps a diary of our AI adventures.
 
-2. **Streaming Response Handling**: It processes the API response in a streaming fashion, allowing for real-time display of the model's output.
+## 📜 The Art of Word Wrapping in REPLs
 
-3. **Text Formatting**: The TextStreamer class handles formatting of the output text, including:
-   - Preserving original newlines from the model's output.
-   - Wrapping text to fit the terminal width without breaking words across lines.
-   - Handling tokens of varying lengths, including spaces and punctuation.
+Ah, word wrapping in REPLs (Read-Eval-Print Loops) - it's like trying to fit a square peg in a round hole sometimes! 🔄🧩
 
-4. **Live Display**: Utilizes the rich library's Live display to update the console in real-time as new text is received.
+### The Chunky Challenge 🍫
 
-5. **Error Handling**: Includes error handling for API connection issues and unexpected responses.
+In the world of language models, text comes in bite-sized pieces called tokens. But here's the catch: tokens don't always play nice with our human concept of words! 
 
-6. **Logging**: Implements logging for important events and errors, aiding in debugging and monitoring.
+```
+Token 1: "Super"
+Token 2: "cali"
+Token 3: "fragilistic"
+Token 4: "expiali"
+Token 5: "docious"
+```
 
-## Importance of Formatting Output
+See the problem? We don't know if we need a line break until we've seen all the tokens that make up a word or sentence. It's like trying to solve a puzzle without seeing all the pieces! 🧩
 
-Proper formatting of the output is crucial for several reasons:
+### Our Solution: Better Safe Than Sorry! 🦺
 
-1. **Readability**: Well-formatted text is easier to read and understand, especially in a terminal environment where space may be limited.
+In our `TextStreamer`, we've taken the "better safe than sorry" approach. We'd rather keep words intact than split them across lines. It might not be perfect, but it's way better than seeing:
 
-2. **Word Integrity**: Keeping words intact (not split across lines) is important for maintaining the meaning and flow of the text.
+```
+Supercalifragilistic
+expialidocious
+```
 
-3. **Preserving Model Intent**: By respecting newlines in the model's output, we maintain any intentional formatting or structure in the response.
+Instead, we aim for:
 
-4. **Adaptability**: The text wrapping adapts to different terminal sizes, ensuring a consistent experience across various environments.
+```
+Supercalifragilisticexpialidocious
+```
 
-5. **Real-time Feedback**: Streaming the formatted output provides immediate feedback to the user, enhancing the interactive experience.
+It's not always pretty, but it keeps the meaning intact! 💪
 
-6. **Aesthetic Consistency**: Proper formatting contributes to a polished, professional appearance of the application.
+## 🎉 Conclusion
 
-The current implementation in ollama_client.py strikes a balance between these factors, prioritizing word integrity and original formatting while ensuring the output fits within the terminal constraints.
-
-## Conclusion
-
-ollama_client.py serves as a robust interface between a Python application and the Ollama language model service. Its careful handling of text streaming and formatting ensures a smooth, readable output that respects both the model's output and the constraints of the terminal environment.
+`ollama_client.py` is your ticket to the AI carnival! 🎟️ It handles the nitty-gritty of talking to Ollama, makes sure the response looks good, and even juggles words to keep them whole. It's not just a module; it's a magical AI experience in your terminal! ✨🖥️
