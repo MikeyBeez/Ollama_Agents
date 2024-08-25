@@ -1,7 +1,6 @@
-from typing import Optional, Callable, Dict
-from src.modules.assemble import get_chat_history, truncate_chat_history
+from typing import Callable, Dict
 from rich.console import Console
-from rich.text import Text
+from src.modules.command_functions import print_history, truncate_history, memory_search, change_model_command, duck_duck_go_search
 
 console = Console()
 
@@ -13,45 +12,20 @@ Available commands:
 /q or /quit - Exit the program
 /hi - Show chat history
 /tr n - Truncate chat history to last n entries
+/ms n m query - Search memories and process query
+  n: Number of top results (default: 3)
+  m: Minimum similarity percentage (default: 60)
+  query: Your question or prompt
+  Example: /ms 5 70 Who was Bach?
+/cm - Change the current Ollama model
+/s query - Search DuckDuckGo for the given query
 """
-    console.print(help_text, style="bold green")
-    return 'CONTINUE'
-
-def print_history() -> str:
-    history = get_chat_history()
-    if not history:
-        console.print("No chat history available.", style="bold green")
-        return 'CONTINUE'
-
-    history_text = Text()
-    for i, (prompt, response) in enumerate(history):
-        history_text.append(f"\n--- Entry {i+1} ---\n", style="bold green")
-        history_text.append(f"User: {prompt}\n", style="bold green")
-        history_text.append(f"Assistant: {response}\n", style="bold green")
-
-    console.print("Chat History:", style="bold green")
-    console.print(history_text)
-    
-    console.print(f"\nTotal entries in chat history: {len(history)}", style="bold cyan")
-    
+    console.print(help_text, style="bold purple")
     return 'CONTINUE'
 
 def exit_program() -> str:
     console.print("Exiting program.", style="bold red")
     return 'EXIT'
-
-def truncate_history(command: str) -> str:
-    try:
-        n = int(command.split()[1])
-        if n < 0:
-            raise ValueError("Number of entries must be non-negative")
-        truncate_chat_history(n)
-        console.print(f"Chat history truncated to last {n} entries.", style="bold green")
-    except IndexError:
-        console.print("Error: Please provide the number of entries to keep. Usage: /tr n", style="bold red")
-    except ValueError as e:
-        console.print(f"Error: {str(e)}. Please provide a valid non-negative integer.", style="bold red")
-    return 'CONTINUE'
 
 SLASH_COMMANDS: Dict[str, Callable[[], str]] = {
     '/h': get_help,
@@ -62,11 +36,14 @@ SLASH_COMMANDS: Dict[str, Callable[[], str]] = {
     '/quit': exit_program,
     '/hi': print_history,
     '/tr': truncate_history,
+    '/ms': memory_search,
+    '/cm': change_model_command,
+    '/s': duck_duck_go_search,
 }
 
 def handle_slash_command(command: str) -> str:
     cmd_function = SLASH_COMMANDS.get(command.split()[0].lower())
     if cmd_function:
-        return cmd_function(command) if cmd_function == truncate_history else cmd_function()
+        return cmd_function(command) if cmd_function in [truncate_history, memory_search, change_model_command, duck_duck_go_search] else cmd_function()
     console.print(f"Unknown command: {command}", style="bold red")
     return 'CONTINUE'
