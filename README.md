@@ -46,11 +46,11 @@ python -m unittest discover src/tests
 
 ## 📘 Module Documentation
 
-- [Input Module](docs/input_module.md)
-- [Ollama Client](docs/ollama_client.md)
-- [Assemble Module](docs/assemble_module.md)
-- [Banner Module](docs/banner_module.md)
-- [DuckDuckGo Search](docs/ddg_search_module.md)
+- 🎛️ [Input Module](docs/input_module.md)
+- 🤖 [Ollama Client](docs/ollama_client.md)
+- 🧩 [Assemble Module](docs/assemble_module.md)
+- 🎨 [Banner Module](docs/banner_module.md)
+- 🔍 [DuckDuckGo Search](docs/ddg_search_module.md)
 
 ## 🔍 Memory Search Commands
 
