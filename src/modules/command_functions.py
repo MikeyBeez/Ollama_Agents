@@ -1,3 +1,5 @@
+# src/modules/command_functions.py
+
 import os
 from typing import List
 from rich.console import Console
@@ -87,7 +89,7 @@ def upload_document(command: str) -> str:
     console.print(f"Uploaded and processed {len(chunks)} chunks from {os.path.basename(file_path)}", style="bold green")
     return 'CONTINUE'
 
-def memory_search(command: str) -> str:
+def memory_search_long(command: str) -> str:
     try:
         parts = command.split(maxsplit=3)
         if len(parts) < 4:
@@ -122,6 +124,53 @@ def memory_search(command: str) -> str:
                         console.print(f"Content: {memory.get('content', 'No content available')}", style="yellow")
                 else:  # document_chunk or unknown
                     console.print(f"Content: {memory.get('content', 'No content available')}", style="yellow")
+
+            # Prepare context from memories
+            context = "\n".join([f"Memory (similarity {m['similarity']:.2f}):\n{m['content']}" for m in memories])
+
+            # Generate answer using AI model
+            prompt = f"You are {AGENT_NAME}, an AI assistant. Based on the following memories and the original query, please provide a comprehensive answer:\n\nQuery: {query}\n\nRelevant Memories:\n{context}\n\nAnswer:"
+            answer = process_prompt(prompt, DEFAULT_MODEL, USER_NAME)
+
+            console.print("\nGenerated Answer:", style="bold blue")
+            console.print(answer, style="bold green")
+
+    except ValueError as e:
+        console.print(f"Error: {str(e)}. Usage: /msl n m query (where n is the number of memories, m is the similarity threshold between 0 and 1, and query is your question)", style="bold red")
+    except Exception as e:
+        console.print(f"An error occurred: {str(e)}", style="bold red")
+        console.print("Traceback:", style="bold red")
+        console.print(traceback.format_exc(), style="red")
+
+    return 'CONTINUE'
+
+def memory_search(command: str) -> str:
+    try:
+        parts = command.split(maxsplit=3)
+        if len(parts) < 4:
+            raise ValueError("Insufficient arguments")
+
+        _, top_k, similarity_threshold, query = parts
+        top_k = int(top_k)
+        similarity_threshold = float(similarity_threshold)
+
+        if top_k <= 0 or similarity_threshold < 0 or similarity_threshold > 1:
+            raise ValueError("Invalid parameters")
+
+        memories = search_memories(query, top_k=top_k, similarity_threshold=similarity_threshold)
+
+        if not memories:
+            console.print("No relevant memories found.", style="bold yellow")
+        else:
+            # Prepare context from memories
+            context = "\n".join([f"Memory (similarity {m['similarity']:.2f}):\n{m['content']}" for m in memories])
+
+            # Generate answer using AI model
+            prompt = f"You are {AGENT_NAME}, an AI assistant. Based on the following memories and the original query, please provide a comprehensive answer:\n\nQuery: {query}\n\nRelevant Memories:\n{context}\n\nAnswer:"
+            answer = process_prompt(prompt, DEFAULT_MODEL, USER_NAME)
+
+            console.print("\nGenerated Answer:", style="bold blue")
+            console.print(answer, style="bold green")
 
     except ValueError as e:
         console.print(f"Error: {str(e)}. Usage: /ms n m query (where n is the number of memories, m is the similarity threshold between 0 and 1, and query is your question)", style="bold red")

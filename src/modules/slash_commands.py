@@ -1,7 +1,9 @@
+# src/modules/slash_commands.py
+
 from typing import Callable, Dict
 from rich.console import Console
-from src.modules.command_functions import print_history, truncate_history, memory_search, change_model_command, duck_duck_go_search
-from src.modules.command_functions_2 import upload_document, print_chunk_history
+from src.modules.command_functions import print_history, truncate_history, memory_search, memory_search_long, change_model_command, duck_duck_go_search, upload_document
+from src.modules.command_functions_2 import print_chunk_history
 
 console = Console()
 
@@ -14,7 +16,8 @@ Available commands:
 /hi - Show chat history
 /ch - Show chunk history
 /tr n - Truncate chat history to last n entries
-/ms n m query - Search memories and process query
+/ms n m query - Search memories and process query (short version, only shows answer)
+/msl n m query - Search memories and process query (long version, shows memories and answer)
   n: Number of top results (default: 3)
   m: Minimum similarity percentage (default: 60)
   query: Your question or prompt
@@ -41,6 +44,7 @@ SLASH_COMMANDS: Dict[str, Callable[[], str]] = {
     '/ch': print_chunk_history,
     '/tr': truncate_history,
     '/ms': memory_search,
+    '/msl': memory_search_long,
     '/cm': change_model_command,
     '/s': duck_duck_go_search,
     '/upload': upload_document,
@@ -52,7 +56,7 @@ def handle_slash_command(command: str) -> str:
     cmd_function = SLASH_COMMANDS.get(cmd)
 
     if cmd_function:
-        if cmd in ['/tr', '/ms', '/cm', '/s', '/upload']:
+        if cmd in ['/tr', '/ms', '/msl', '/cm', '/s', '/upload']:
             return cmd_function(command)
         else:
             return cmd_function()

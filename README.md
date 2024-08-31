@@ -8,6 +8,7 @@ Welcome to the magical world of AI_Functions! 🎉 This repository is your ticke
 - 🧠 Enhanced memory management
 - 🔍 Integrated DuckDuckGo search capabilities
 - 🛠️ Modular design for easy customization
+- 🔎 New memory search commands: `/ms` and `/msl`
 
 ## 🌟 Key Features
 
@@ -17,6 +18,7 @@ Welcome to the magical world of AI_Functions! 🎉 This repository is your ticke
 4. **🧪 Comprehensive Testing**: Because quality is our superpower!
 5. **🌐 Web Search Integration**: Your AI can now search the web using DuckDuckGo.
 6. **📜 Chat History**: Never forget a conversation with built-in history management.
+7. **🧠 Memory Search**: Quickly retrieve and utilize relevant information from past interactions and uploaded documents.
 
 ## 🛠️ Getting Started
 
@@ -49,6 +51,15 @@ python -m unittest discover src/tests
 - [Assemble Module](docs/assemble_module.md)
 - [Banner Module](docs/banner_module.md)
 - [DuckDuckGo Search](docs/ddg_search_module.md)
+
+## 🔍 Memory Search Commands
+
+- `/ms n m query`: Search memories and process query (short version, only shows answer)
+- `/msl n m query`: Search memories and process query (long version, shows memories and answer)
+  - `n`: Number of top results to retrieve
+  - `m`: Minimum similarity threshold (0-1)
+  - `query`: Your question or prompt
+  Example: `/ms 5 0.7 Who was Alan Turing?`
 
 ## 🤝 Contributing
 
