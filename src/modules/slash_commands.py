@@ -1,9 +1,8 @@
-# src/modules/slash_commands.py
-
 from typing import Callable, Dict
 from rich.console import Console
 from src.modules.command_functions import print_history, truncate_history, memory_search, memory_search_long, change_model_command, duck_duck_go_search, upload_document
 from src.modules.command_functions_2 import print_chunk_history
+from src.modules.command_functions_3 import fabric_command
 
 console = Console()
 
@@ -25,6 +24,7 @@ Available commands:
 /cm - Change the current Ollama model
 /s query - Search DuckDuckGo for the given query
 /upload - Upload and process a document
+/fabric - Run a Fabric pattern with interactive pattern selection
 """
     console.print(help_text, style="bold purple")
     return 'CONTINUE'
@@ -48,6 +48,7 @@ SLASH_COMMANDS: Dict[str, Callable[[], str]] = {
     '/cm': change_model_command,
     '/s': duck_duck_go_search,
     '/upload': upload_document,
+    '/fabric': fabric_command,
 }
 
 def handle_slash_command(command: str) -> str:
@@ -56,7 +57,7 @@ def handle_slash_command(command: str) -> str:
     cmd_function = SLASH_COMMANDS.get(cmd)
 
     if cmd_function:
-        if cmd in ['/tr', '/ms', '/msl', '/cm', '/s', '/upload']:
+        if cmd in ['/tr', '/ms', '/msl', '/cm', '/s', '/upload', '/fabric']:
             return cmd_function(command)
         else:
             return cmd_function()

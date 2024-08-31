@@ -1,6 +1,6 @@
-# 🌈 AI_Functions: Your Personal AI Assistant Builder 🤖
+# AI_Functions: Your Personal AI Assistant Builder 🤖
 
-Welcome to the magical world of AI_Functions! 🎉 This repository is your ticket to creating a spectacular AI agent using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
+Welcome to AI_Functions! This repository allows you to create a spectacular AI agent using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
 
 ## 🚀 What's New?
 
@@ -9,32 +9,67 @@ Welcome to the magical world of AI_Functions! 🎉 This repository is your ticke
 - 🔍 Integrated DuckDuckGo search capabilities
 - 🛠️ Modular design for easy customization
 - 🔎 New memory search commands: `/ms` and `/msl`
+- 🧵 New `/fabric` command for using Fabric patterns
 
 ## 🌟 Key Features
 
-1. **📚 Modular Architecture**: Each function is a separate module, making it easy to add, remove, or modify features.
-2. **💬 Interactive CLI**: Built with `prompt_toolkit` for a sci-fi movie-worthy experience!
-3. **🔐 Secure Configuration**: Customize your AI's personality in `config.py`.
-4. **🧪 Comprehensive Testing**: Because quality is our superpower!
-5. **🌐 Web Search Integration**: Your AI can now search the web using DuckDuckGo.
-6. **📜 Chat History**: Never forget a conversation with built-in history management.
-7. **🧠 Memory Search**: Quickly retrieve and utilize relevant information from past interactions and uploaded documents.
+1. 📚 Modular Architecture: Each function is a separate module, making it easy to add, remove, or modify features.
+2. 💬 Interactive CLI: Built with `prompt_toolkit` for a sci-fi movie-worthy experience!
+3. 🔐 Secure Configuration: Customize your AI's personality in `config.py`.
+4. 🧪 Comprehensive Testing: Because quality is our superpower!
+5. 🌐 Web Search Integration: Your AI can now search the web using DuckDuckGo.
+6. 📜 Chat History: Never forget a conversation with built-in history management.
+7. 🧠 Memory Search: Quickly retrieve and utilize relevant information from past interactions and uploaded documents.
+8. 🧵 Fabric Integration: Use Fabric patterns for enhanced AI interactions.
 
 ## 🛠️ Getting Started
+
+### Prerequisites
+
+- Python 3.8 or higher
+- Conda (for managing virtual environments)
+- Ollama (for running local language models)
+
+### Setting Up the Environment
 
 1. Clone this repository:
    ```bash
    git clone https://github.com/yourusername/AI_Functions.git
+   cd AI_Functions
    ```
-2. Install dependencies:
+
+2. Create and activate a conda virtual environment:
+   ```bash
+   conda create -n ai_functions python=3.8
+   conda activate ai_functions
+   ```
+
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Customize your AI in `config.py`.
-4. Run the main script:
+
+### Installing Ollama
+
+1. Visit the [Ollama website](https://ollama.com/) and follow the installation instructions for your operating system.
+
+2. Once installed, run Ollama and download a model (e.g., llama2):
    ```bash
-   python src/main.py
+   ollama run llama2
    ```
+
+### Configuration
+
+1. Customize your AI in `config.py`.
+
+2. Set up your API keys and other configurations in a `.env` file (use `.env.example` as a template).
+
+### Running the Application
+
+Run the main script:
+```bash
+python src/main.py
+```
 
 ## 🧪 Running Tests
 
@@ -60,6 +95,15 @@ python -m unittest discover src/tests
   - `m`: Minimum similarity threshold (0-1)
   - `query`: Your question or prompt
   Example: `/ms 5 0.7 Who was Alan Turing?`
+
+## 🧵 Fabric Command
+
+Use the `/fabric` command to interact with Fabric patterns:
+
+1. Type `/fabric` in the chat interface.
+2. Select a pattern from the list provided.
+3. Enter the input text for the selected pattern.
+4. The AI will process your input using the chosen Fabric pattern and return the result.
 
 ## 🤝 Contributing
 
