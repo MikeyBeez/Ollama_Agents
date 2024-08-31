@@ -12,11 +12,11 @@ project_root = Path(__file__).parent.parent.parent
 # Set the data directory relative to the project root
 data_dir = project_root / "data" / "json_history"
 
-def read_file(filename: str) -> Dict[str, Any]:
-    """Read a JSON file and return its contents."""
+def read_memory(filename: str) -> Dict[str, Any]:
+    """Read a JSON memory file and return its contents."""
     with open(data_dir / filename, encoding="utf-8") as f:
         data = json.load(f)
-        logging.debug(f"Read file: {filename}")
+        logging.debug(f"Read memory: {filename}")
         return data
 
 def save_embeddings(filename: str, embeddings: List[float]) -> None:
@@ -39,12 +39,21 @@ def load_embeddings(filename: str) -> List[float]:
         return embeddings
 
 def get_embeddings(filename: str, modelname: str) -> List[float]:
-    """Get embeddings for a file, either from cache or by generating new ones."""
+    """Get embeddings for a memory, either from cache or by generating new ones."""
     if embeddings := load_embeddings(filename):
         return embeddings
-    memory_data = read_file(filename)
-    combined_text = memory_data.get("prompt", "") + "\n" + memory_data.get("response", "")
-    embeddings = ollama.embeddings(model=modelname, prompt=combined_text)["embedding"]
+    memory_data = read_memory(filename)
+    if 'type' not in memory_data:
+        # Handle old format or unknown type
+        text = json.dumps(memory_data)
+    elif memory_data['type'] == 'interaction':
+        if isinstance(memory_data['content'], dict) and 'prompt' in memory_data['content'] and 'response' in memory_data['content']:
+            text = f"{memory_data['content']['prompt']}\n{memory_data['content']['response']}"
+        else:
+            text = str(memory_data['content'])
+    else:  # document_chunk or any other type
+        text = str(memory_data['content'])
+    embeddings = ollama.embeddings(model=modelname, prompt=text)["embedding"]
     save_embeddings(filename, embeddings)
     logging.info(f"Generated new embeddings for file: {filename}")
     return embeddings
@@ -72,13 +81,18 @@ def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.
         if len(relevant_memories) >= top_k:
             break
         filename = memory_files[index].name
-        memory_data = read_file(filename)
+        memory_data = read_memory(filename)
+
+        memory_type = memory_data.get('type', 'unknown')
+        content = memory_data.get('content', memory_data)
+        timestamp = memory_data.get('timestamp', 'unknown')
 
         relevant_memories.append({
-            "prompt": memory_data.get("prompt", ""),
-            "response": memory_data.get("response", ""),
+            "content": content,
+            "type": memory_type,
             "similarity": similarity,
-            "timestamp": memory_data.get("timestamp", "")
+            "timestamp": timestamp,
+            "filename": filename
         })
 
     return relevant_memories
