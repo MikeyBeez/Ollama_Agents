@@ -1,6 +1,6 @@
-# 🧪 AI_Functions Testing Strategy
+# 🧪 Ollama_Agents Testing Strategy
 
-This document outlines our approach to testing AI_Functions.
+This document outlines our approach to testing Ollama_Agents.
 
 ## Testing Philosophy
 

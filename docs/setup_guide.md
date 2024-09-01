@@ -1,6 +1,6 @@
-# 🛠️ AI_Functions Setup Guide
+# 🛠️ Ollama_Agents Setup Guide
 
-This guide will help you set up your development environment for AI_Functions.
+This guide will help you set up your development environment for Ollama_Agents.
 
 ## Prerequisites
 
@@ -12,8 +12,8 @@ This guide will help you set up your development environment for AI_Functions.
 ## Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/AI_Functions.git
-cd AI_Functions
+git clone https://github.com/yourusername/Ollama_Agents.git
+cd Ollama_Agents
 ```
 
 ## Step 2: Set Up a Virtual Environment
@@ -22,8 +22,8 @@ We recommend using a virtual environment to manage dependencies.
 Install Anaconda if you need to:
 
 ```bash
-conda create -name AI_Functions python=3.8
-conda activate AI_Functions
+conda create -name Ollama_Agents python=3.8
+conda activate Ollama_Agents
 ```
 
 ## Step 3: Install Dependencies
@@ -57,10 +57,10 @@ AI_LOG_LEVEL=INFO
 Add the following line to your `.bashrc`, `.zshrc`, or equivalent shell configuration file:
 
 ```bash
-export PYTHONPATH=/path/to/your/AI_Functions:$PYTHONPATH
+export PYTHONPATH=/path/to/your/Ollama_Agents:$PYTHONPATH
 ```
 
-Replace `/path/to/your/AI_Functions` with the actual path to your project directory.
+Replace `/path/to/your/Ollama_Agents` with the actual path to your project directory.
 
 After adding this line, restart your terminal or run:
 
@@ -82,7 +82,7 @@ python -m unittest discover src/tests
 python -m src.main
 ```
 
-You're now ready to start developing with AI_Functions!
+You're now ready to start developing with Ollama_Agents!
 
 ## Troubleshooting
 

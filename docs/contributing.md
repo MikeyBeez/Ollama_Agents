@@ -1,6 +1,6 @@
-# 🤝 Contributing to AI_Functions
+# 🤝 Contributing to Ollama_Agents
 
-We welcome contributions to AI_Functions! This guide will help you get started.
+We welcome contributions to Ollama_Agents! This guide will help you get started.
 
 ## Code of Conduct
 
@@ -63,4 +63,4 @@ Please read and adhere to our [Code of Conduct](CODE_OF_CONDUCT.md) in all your 
 
 If you have any questions or need further clarification, please open an issue or contact the maintainers.
 
-Thank you for contributing to AI_Functions! 🎉
+Thank you for contributing to Ollama_Agents! 🎉

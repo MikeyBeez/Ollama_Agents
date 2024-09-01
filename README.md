@@ -1,6 +1,6 @@
-# AI_Functions: Your Personal AI Assistant Builder 🤖
+# Ollama_Agents: Your Personal AI Assistant Builder 🤖
 
-Welcome to AI_Functions! This repository allows you to create spectacular AI agents using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistants! 🧱✨
+Welcome to Ollama_Agents! This repository allows you to create spectacular AI agents using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistants! 🧱✨
 
 ## 🚀 What's New?
 
@@ -39,14 +39,14 @@ Welcome to AI_Functions! This repository allows you to create spectacular AI age
 
 1. Fork and clone this repository:
    ```bash
-   git clone https://github.com/yourusername/AI_Functions.git
-   cd AI_Functions
+   git clone https://github.com/yourusername/Ollama_Agents.git
+   cd Ollama_Agents
    ```
 
 2. Create and activate a conda virtual environment:
    ```bash
-   conda create -n ai_functions python=3.8
-   conda activate ai_functions
+   conda create -n Ollama_Agents python=3.8
+   conda activate Ollama_Agents
    ```
 
 3. Install dependencies:
@@ -56,7 +56,7 @@ Welcome to AI_Functions! This repository allows you to create spectacular AI age
 
 4. Set up your PYTHONPATH:
    ```bash
-   export PYTHONPATH=/path/to/your/AI_Functions:$PYTHONPATH
+   export PYTHONPATH=/path/to/your/Ollama_Agents:$PYTHONPATH
    ```
 
 ### Installing Ollama
@@ -136,4 +136,4 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ---
 
-Built with ❤️ and ☕ by the AI_Functions team. Let's make AI magic happen! ✨
+Built with ❤️ and ☕ by the Ollama_Agents team. Let's make AI magic happen! ✨

@@ -1,10 +1,10 @@
-# 🌈 AI_Functions: Comprehensive Architecture Guide 🤖
+# 🌈 Ollama_Agents: Comprehensive Architecture Guide 🤖
 
-Welcome to the magical world of AI_Functions! 🎉 This guide will take you on a journey through the architecture and components of our AI assistant builder. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
+Welcome to the magical world of Ollama_Agents! 🎉 This guide will take you on a journey through the architecture and components of our AI assistant builder. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
 
 ## 🚀 Introduction and Key Features
 
-AI_Functions is a modular and flexible framework for creating AI assistants. Here are some of its key features:
+Ollama_Agents is a modular and flexible framework for creating AI assistants. Here are some of its key features:
 
 - 🎨 Colorful command-line interface
 - 🧠 Enhanced memory management
@@ -17,7 +17,7 @@ AI_Functions is a modular and flexible framework for creating AI assistants. Her
 
 ## 🏗️ System Architecture Overview
 
-AI_Functions is designed with modularity and flexibility in mind. Here's a high-level view of how the components fit together:
+Ollama_Agents is designed with modularity and flexibility in mind. Here's a high-level view of how the components fit together:
 
 ```mermaid
 graph TD
@@ -40,7 +40,7 @@ graph TD
 
 ## 🧱 Core Components
 
-Let's dive deeper into each core component of AI_Functions:
+Let's dive deeper into each core component of Ollama_Agents:
 
 ### 1. 🎛️ Main Application (`main.py`)
 The conductor of our AI orchestra, coordinating all the modules.
@@ -113,7 +113,7 @@ As your AI assistant grows, consider:
 
 ## 🎉 Conclusion
 
-AI_Functions is designed to be both powerful and playful. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. This architecture allows for easy customization and extension, making it a versatile platform for building AI assistants.
+Ollama_Agents is designed to be both powerful and playful. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. This architecture allows for easy customization and extension, making it a versatile platform for building AI assistants.
 
 Remember to keep your tests up-to-date as you add new features or modify existing ones. This will ensure the continued reliability and maintainability of your AI assistant.
 

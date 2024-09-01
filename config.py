@@ -33,7 +33,7 @@ EMBEDDINGS_DIR.mkdir(parents=True, exist_ok=True)
 
 # File paths
 # Specify locations for important files
-CHAT_HISTORY_FILE = Path.home() / ".ai_functions_chat_history.json"
+CHAT_HISTORY_FILE = Path.home() / ".ollama_agents_chat_history.json"
 
 # Search configuration
 # Parameters for memory search functionality
@@ -43,7 +43,7 @@ DEFAULT_SIMILARITY_THRESHOLD = float(os.getenv("AI_DEFAULT_SIMILARITY_THRESHOLD"
 # Logging configuration
 # Settings for system logging
 LOG_LEVEL = os.getenv("AI_LOG_LEVEL", "INFO")  # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-LOG_FILE = PROJECT_ROOT / "logs" / "ai_functions.log"  # Path to log file
+LOG_FILE = PROJECT_ROOT / "logs" / "ollama_agents.log"  # Path to log file
 
 # Ensure log directory exists
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)

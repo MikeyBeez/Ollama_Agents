@@ -13,7 +13,7 @@ class ChunkHistory:
         if cls._instance is None:
             cls._instance = super(ChunkHistory, cls).__new__(cls)
             cls._instance.chunks = deque(maxlen=CHUNK_LENGTH)
-            cls._instance.file_path = Path.home() / ".ai_functions_chunk_history.json"
+            cls._instance.file_path = Path.home() / ".ollama_agents_chunk_history.json"
             cls._instance.load_history()
         return cls._instance
 
