@@ -64,7 +64,7 @@ Welcome to AI_Functions! This repository allows you to create a spectacular AI a
 
 1. Customize your AI in `config.py`.
 
-2. Set up your API keys and other configurations in a `.env` file (use `.env.example` as a template).
+2. Set up your API keys and other configurations in a `.env` file (use `.env.example` as a template). Currently only Ollama is supported.
 
 ### Running the Application
 
