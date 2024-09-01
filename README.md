@@ -11,6 +11,7 @@ Welcome to AI_Functions! This repository allows you to create a spectacular AI a
 - 🔎 Memory search commands: `/ms` and `/msl`
 - 🧵 New `/fabric` command for using Fabric patterns
 - 📂 Refactored command structure for better organization
+- 🧪 Comprehensive test suite added
 
 ## 🌟 Key Features
 
@@ -106,14 +107,48 @@ Use the `/fabric` command to interact with Fabric patterns:
 3. Enter the input text for the selected pattern.
 4. The AI will process your input using the chosen Fabric pattern and return the result.
 
-## 📂 New File Structure
+## 📂 File Structure
 
-The command functions have been reorganized into the following files for better maintainability:
+The project structure has been updated to include a comprehensive test suite:
 
-- `basic_commands.py`: Basic operations like changing models and web searches.
-- `document_commands.py`: Document handling operations like uploading and chunking.
-- `fabric_commands.py`: Fabric pattern-related commands.
-- `memory_commands.py`: Memory and history-related operations.
+```
+AI_Functions/
+├── src/
+│   ├── modules/
+│   │   ├── __init__.py
+│   │   ├── assemble.py
+│   │   ├── banner.py
+│   │   ├── basic_commands.py
+│   │   ├── chunk_history.py
+│   │   ├── ddg_search.py
+│   │   ├── document_commands.py
+│   │   ├── fabric_commands.py
+│   │   ├── file_utils.py
+│   │   ├── input.py
+│   │   ├── memory_commands.py
+│   │   ├── memory_search.py
+│   │   ├── ollama_client.py
+│   │   ├── save_history.py
+│   │   └── slash_commands.py
+│   ├── tests/
+│   │   ├── test_file_utils.py
+│   │   ├── test_input.py
+│   │   ├── test_memory_search.py
+│   │   ├── test_ollama_client.py
+│   │   └── test_save_history.py
+│   └── main.py
+├── docs/
+│   ├── assemble_module.md
+│   ├── banner_module.md
+│   ├── ddg_search_module.md
+│   ├── input_module.md
+│   └── ollama_client.md
+├── documentation/
+│   └── architecture_guide.md
+├── config.py
+├── requirements.txt
+└── README.md
+```
 
 ## 🤝 Contributing
 
