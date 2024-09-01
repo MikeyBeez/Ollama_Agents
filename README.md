@@ -88,6 +88,7 @@ python -m unittest discover src/tests
 - 🧩 [Assemble Module](docs/assemble_module.md)
 - 🎨 [Banner Module](docs/banner_module.md)
 - 🔍 [DuckDuckGo Search](docs/ddg_search_module.md)
+- 🏗️ [Architecture Guide](docs/architecture_guide.md)
 
 ## 🔍 Memory Search Commands
 
@@ -109,7 +110,7 @@ Use the `/fabric` command to interact with Fabric patterns:
 
 ## 📂 File Structure
 
-The project structure has been updated to include a comprehensive test suite:
+The project structure has been updated to include a comprehensive test suite and consolidated documentation:
 
 ```
 AI_Functions/
@@ -138,13 +139,12 @@ AI_Functions/
 │   │   └── test_save_history.py
 │   └── main.py
 ├── docs/
+│   ├── architecture_guide.md
 │   ├── assemble_module.md
 │   ├── banner_module.md
 │   ├── ddg_search_module.md
 │   ├── input_module.md
 │   └── ollama_client.md
-├── documentation/
-│   └── architecture_guide.md
 ├── config.py
 ├── requirements.txt
 └── README.md
