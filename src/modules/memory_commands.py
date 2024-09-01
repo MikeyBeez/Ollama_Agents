@@ -1,3 +1,5 @@
+# src/modules/memory_commands.py
+
 from typing import List, Dict, Any
 from rich.console import Console
 from src.modules.memory_search import search_memories
@@ -100,7 +102,7 @@ def memory_search_long(command: str) -> str:
 
     return 'CONTINUE'
 
-def print_history() -> str:
+def print_history(command: str = '') -> str:
     history = get_chat_history()
     if not history:
         console.print("No chat history available.", style="bold green")

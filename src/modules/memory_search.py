@@ -1,3 +1,5 @@
+# src/modules/memory_search.py
+
 import os
 import json
 import numpy as np
@@ -13,14 +15,21 @@ project_root = Path(__file__).parent.parent.parent
 data_dir = project_root / "data" / "json_history"
 
 def read_memory(filename: str) -> Dict[str, Any]:
-    """Read a JSON memory file and return its contents."""
-    with open(data_dir / filename, encoding="utf-8") as f:
+    file_path = data_dir / filename
+    with open(file_path, 'r', encoding="utf-8") as f:
         data = json.load(f)
-        logging.debug(f"Read memory: {filename}")
-        return data
+
+    # Increment access count
+    data['access_count'] = data.get('access_count', 0) + 1
+
+    # Save the updated data
+    with open(file_path, 'w', encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    logging.debug(f"Read memory: {filename}, access count: {data['access_count']}")
+    return data
 
 def save_embeddings(filename: str, embeddings: List[float]) -> None:
-    """Save embeddings to a JSON file."""
     embeddings_dir = data_dir / "embeddings"
     embeddings_dir.mkdir(exist_ok=True)
     with open(embeddings_dir / f"{filename}.json", "w") as f:
@@ -28,7 +37,6 @@ def save_embeddings(filename: str, embeddings: List[float]) -> None:
     logging.info(f"Saved embeddings for file: {filename}")
 
 def load_embeddings(filename: str) -> List[float]:
-    """Load embeddings from a JSON file."""
     embeddings_file = data_dir / "embeddings" / f"{filename}.json"
     if not embeddings_file.exists():
         logging.debug(f"No existing embeddings found for file: {filename}")
@@ -39,7 +47,6 @@ def load_embeddings(filename: str) -> List[float]:
         return embeddings
 
 def get_embeddings(filename: str, modelname: str) -> List[float]:
-    """Get embeddings for a memory, either from cache or by generating new ones."""
     if embeddings := load_embeddings(filename):
         return embeddings
     memory_data = read_memory(filename)
@@ -59,7 +66,6 @@ def get_embeddings(filename: str, modelname: str) -> List[float]:
     return embeddings
 
 def find_most_similar(needle: List[float], haystack: List[List[float]]) -> List[Tuple[float, int]]:
-    """Find cosine similarity of every file to a given embedding."""
     needle_norm = norm(needle)
     similarity_scores = [
         np.dot(needle, item) / (needle_norm * norm(item)) for item in haystack
@@ -67,7 +73,6 @@ def find_most_similar(needle: List[float], haystack: List[List[float]]) -> List[
     return sorted(zip(similarity_scores, range(len(haystack))), reverse=True)
 
 def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.0) -> List[Dict[str, Any]]:
-    """Search memories and return the most relevant ones with metadata."""
     logging.info(f"Searching memories for query: {query}")
     memory_files = [f for f in data_dir.glob("*.json") if f.is_file()]
     embeddings = [get_embeddings(f.name, "nomic-embed-text") for f in memory_files]
@@ -81,24 +86,21 @@ def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.
         if len(relevant_memories) >= top_k:
             break
         filename = memory_files[index].name
-        memory_data = read_memory(filename)
-
-        memory_type = memory_data.get('type', 'unknown')
-        content = memory_data.get('content', memory_data)
-        timestamp = memory_data.get('timestamp', 'unknown')
+        memory_data = read_memory(filename)  # This will now increment the access count
 
         relevant_memories.append({
-            "content": content,
-            "type": memory_type,
+            "content": memory_data.get("content", ""),
+            "type": memory_data.get("type", "unknown"),
             "similarity": similarity,
-            "timestamp": timestamp,
+            "timestamp": memory_data.get("timestamp", ""),
+            "access_count": memory_data.get("access_count", 0),
+            "permanent_marker": memory_data.get("permanent_marker", 0),
             "filename": filename
         })
 
     return relevant_memories
 
 def generate_embeddings_for_existing_files():
-    """Generate embeddings for all existing JSON files that don't have embeddings yet."""
     memory_files = [f for f in data_dir.glob("*.json") if f.is_file()]
     for file in memory_files:
         if not load_embeddings(file.name):

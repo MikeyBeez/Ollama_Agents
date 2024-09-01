@@ -1,8 +1,11 @@
+# src/modules/save_history.py
+
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 from config import MEMORY_LENGTH
+import logging
 
 class ChatHistory:
     _instance = None
@@ -61,6 +64,8 @@ def save_memory(memory_type, content, username, model_name, metadata=None):
         "model_name": model_name,
         "type": memory_type,
         "content": content,
+        "access_count": 0,  # Initialize access count
+        "permanent_marker": 0  # Initialize permanent marker
     }
     if metadata:
         data.update(metadata)
@@ -70,9 +75,7 @@ def save_memory(memory_type, content, username, model_name, metadata=None):
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    # Add the entry to the chat history
-    if memory_type == "interaction":
-        chat_history.add_entry(content["prompt"], content["response"])
+    logging.info(f"Saved memory: {filename}")
 
 def save_interaction(prompt, response, username, model_name):
     save_memory("interaction", {"prompt": prompt, "response": response}, username, model_name)

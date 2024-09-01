@@ -1,3 +1,5 @@
+# src/modules/document_commands.py
+
 import os
 from typing import List
 from rich.console import Console
@@ -86,7 +88,7 @@ def upload_document(command: str) -> str:
     console.print(f"Uploaded and processed {len(chunks)} chunks from {os.path.basename(file_path)}", style="bold green")
     return 'CONTINUE'
 
-def print_chunk_history() -> str:
+def print_chunk_history(command: str = '') -> str:
     chunks = get_chunk_history()
     if not chunks:
         console.print("No chunk history available.", style="bold green")

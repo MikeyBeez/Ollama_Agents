@@ -1,3 +1,5 @@
+# src/modules/slash_commands.py
+
 from typing import Callable, Dict
 from rich.console import Console
 from src.modules.basic_commands import change_model_command, duck_duck_go_search
@@ -7,34 +9,30 @@ from src.modules.memory_commands import print_history, truncate_history, memory_
 
 console = Console()
 
-def get_help() -> str:
+def get_help(command: str = '') -> str:
     help_text = """
-Available commands:
-/h or /help - Show this help message
-/e or /exit - Exit the program
-/q or /quit - Exit the program
-/hi - Show chat history
-/ch - Show chunk history
-/tr n - Truncate chat history to last n entries
-/ms n m query - Search memories and process query (short version, only shows answer)
-/msl n m query - Search memories and process query (long version, shows memories and answer)
-  n: Number of top results (default: 3)
-  m: Minimum similarity percentage (default: 60)
-  query: Your question or prompt
-  Example: /ms 5 70 Who was Bach?
-/cm - Change the current Ollama model
-/s query - Search DuckDuckGo for the given query
-/upload - Upload and process a document
-/fabric - Run a Fabric pattern with interactive pattern selection
-"""
+    Available commands:
+    /h or /help - Show this help message
+    /e or /exit - Exit the program
+    /q or /quit - Exit the program
+    /hi - Show chat history
+    /ch - Show chunk history
+    /tr n - Truncate chat history to last n entries
+    /ms n m query - Search memories and process query (short version)
+    /msl n m query - Search memories and process query (long version)
+    /cm - Change the current Ollama model
+    /s query - Search DuckDuckGo for the given query
+    /upload - Upload and process a document
+    /fabric - Run a Fabric pattern with interactive pattern selection
+    """
     console.print(help_text, style="bold purple")
     return 'CONTINUE'
 
-def exit_program() -> str:
+def exit_program(command: str = '') -> str:
     console.print("Exiting program.", style="bold red")
     return 'EXIT'
 
-SLASH_COMMANDS: Dict[str, Callable[[], str]] = {
+SLASH_COMMANDS: Dict[str, Callable[[str], str]] = {
     '/h': get_help,
     '/help': get_help,
     '/e': exit_program,
@@ -58,10 +56,7 @@ def handle_slash_command(command: str) -> str:
     cmd_function = SLASH_COMMANDS.get(cmd)
 
     if cmd_function:
-        if cmd in ['/tr', '/ms', '/msl', '/cm', '/s', '/upload', '/fabric']:
-            return cmd_function(command)
-        else:
-            return cmd_function()
+        return cmd_function(command)
     else:
         console.print(f"Unknown command: {command}", style="bold red")
         return 'CONTINUE'

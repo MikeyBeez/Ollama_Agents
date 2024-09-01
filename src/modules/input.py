@@ -1,3 +1,5 @@
+# src/modules/input.py
+
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -49,7 +51,7 @@ def get_user_input():
             result = handle_slash_command(user_input)
             if result == 'EXIT':
                 return None  # Exit the program
-            return 'CONTINUE'  # For all other slash commands, including /hi and /h
+            return 'CONTINUE'  # For all other slash commands
 
         return user_input
 
