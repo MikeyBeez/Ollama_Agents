@@ -1,11 +1,15 @@
-# 🌈 Ollama_Agents: Comprehensive Architecture Guide 🤖
+# 🏗️ Ollama_Agents: Comprehensive Architecture Guide 🤖
 
 Welcome to the magical world of Ollama_Agents! 🎉 This guide will take you on a journey through the architecture and components of our AI assistant builder. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
 
-## 🚀 Introduction and Key Features
+## 1. 🌐 Overview
 
-Ollama_Agents is a modular and flexible framework for creating AI assistants. Here are some of its key features:
+Ollama_Agents is a modular and flexible framework for creating AI assistants. It leverages the Ollama API and is designed with extensibility in mind, allowing users to create and interact with multiple AI agents.
 
+## 2. 🚀 Key Features
+
+- 🎭 Multi-agent system: Interact with multiple AI personalities
+- 🔀 Easy agent selection from the main menu
 - 🎨 Colorful command-line interface
 - 🧠 Enhanced memory management
 - 🔍 Integrated DuckDuckGo search capabilities
@@ -14,10 +18,12 @@ Ollama_Agents is a modular and flexible framework for creating AI assistants. He
 - 🔐 Secure configuration options
 - 🧪 Comprehensive testing suite
 - 📜 Built-in chat history management
+- 🔎 Memory search commands: `/ms` and `/msl`
+- 🧵 Fabric pattern integration with `/fabric` command
 
-## 🏗️ System Architecture Overview
+## 3. 🏗️ System Architecture
 
-Ollama_Agents is designed with modularity and flexibility in mind. Here's a high-level view of how the components fit together:
+Ollama_Agents is designed with modularity and flexibility in mind. Here's a high-level view of the components:
 
 ```mermaid
 graph TD
@@ -38,70 +44,83 @@ graph TD
     style B,C,D,E,F,L,M,N fill:#99ff99,stroke:#333,stroke-width:2px
 ```
 
-## 🧱 Core Components
+## 4. 🧱 Core Components
 
-Let's dive deeper into each core component of Ollama_Agents:
+### 4.1 Main Application (`src/main.py`)
+- Entry point of the application
+- Manages the overall flow and agent selection
 
-### 1. 🎛️ Main Application (`main.py`)
-The conductor of our AI orchestra, coordinating all the modules.
+### 4.2 Agents (`src/agents/`)
+- `multi_agent.py`: Implements multi-agent functionality
+- `one_agent.py`: Implements single agent functionality
 
-### 2. 📥 Input Module (`input.py`)
-Handles all user inputs with style, supporting command history and auto-completion.
+### 4.3 Modules (`src/modules/`)
+- `assemble.py`: Handles prompt assembly and history management
+- `banner.py`: Manages CLI visual elements
+- `basic_commands.py`: Implements core slash commands
+- `chunk_history.py`: Manages document chunk history
+- `ddg_search.py`: Integrates DuckDuckGo search functionality
+- `document_commands.py`: Handles document-related operations
+- `fabric_commands.py`: Integrates Fabric pattern functionality
+- `file_utils.py`: Provides file handling utilities
+- `input.py`: Manages user input processing
+- `memory_commands.py`: Implements memory-related operations
+- `memory_search.py`: Handles memory search functionality
+- `ollama_client.py`: Manages communication with Ollama API
+- `save_history.py`: Handles saving and loading of chat history
+- `slash_commands.py`: Implements slash command processing
 
-### 3. 🤖 Ollama Client (`ollama_client.py`)
-Manages communication with the Ollama AI model, sending prompts and receiving responses.
+## 5. 🔄 Data Flow
 
-### 4. 🧩 Assemble Module (`assemble.py`)
-Maintains conversation history and assembles context for AI prompts.
+1. User input (`input.py`) → Main application (`main.py`)
+2. Command processing (`slash_commands.py`) or agent interaction
+3. If agent interaction:
+   a. Prompt assembly (`assemble.py`)
+   b. API communication (`ollama_client.py`)
+   c. Response processing and display
 
-### 5. 🎨 Banner Module (`banner.py`)
-Creates beautiful visual elements for the CLI interface.
+## 6. 🧠 Memory Management
 
-### 6. 🔍 DuckDuckGo Search (`ddg_search.py`)
-Integrates web search capabilities, allowing the AI to access current information.
+- Short-term memory: Managed in `save_history.py`
+- Long-term memory: Implemented through document chunks and embeddings
+- Memory search: Implemented in `memory_search.py`
 
-### 7. 📁 File Utils (`file_utils.py`)
-Handles file operations, including reading and writing JSON files.
+## 7. 🔍 Search Functionality
 
-### 8. 🧠 Memory Search (`memory_search.py`)
-Implements advanced memory search functionality using embeddings.
+- Memory search: `/ms` and `/msl` commands
+- Web search: Integrated through `ddg_search.py`
 
-### 9. 🧵 Fabric Commands (`fabric_commands.py`)
-Integrates Fabric patterns for enhanced AI interactions.
+## 8. 🎨 User Interface
 
-## 🔄 Data Flow
+- CLI interface with rich formatting (`banner.py`)
+- Interactive input handling (`input.py`)
+- Customizable prompt style
 
-1. User input ➡️ Input Module
-2. Input Module ➡️ Main Application
-3. Main Application ➡️ Appropriate Module (based on command)
-4. Module Processing ➡️ Main Application
-5. Main Application ➡️ Ollama Client (if needed)
-6. Ollama Client ➡️ Main Application
-7. Main Application ➡️ User (via Banner Module)
+## 9. 🔧 Extensibility
 
-## 🧪 Testing Architecture
+- New agents can be added to the `agents/` directory
+- Additional modules can be integrated into the `modules/` directory
+- Fabric patterns can be added through the `/fabric` command
 
-The project now includes a comprehensive test suite located in `src/tests/`. Key test files include:
+## 10. 🔐 Configuration
 
-- `test_file_utils.py`: Tests for file operations
-- `test_input.py`: Tests for user input handling
-- `test_memory_search.py`: Tests for memory search functionality
-- `test_ollama_client.py`: Tests for Ollama API interactions
-- `test_save_history.py`: Tests for chat history management
+- Central configuration managed in `config.py`
+- Environment variables for sensitive information
 
-Run all tests using:
-```bash
-python -m unittest discover src/tests
-```
+## 11. 🧪 Testing
 
-## 🛠️ Customization Points
+- Comprehensive test suite in `src/tests/`
+- Covers core functionalities and modules
+- Run tests using: `python -m unittest discover src/tests`
 
-- 🎭 **Personality**: Tweak `config.py` to adjust your AI's persona.
-- 🧠 **AI Model**: Modify `ollama_client.py` to use different AI backends.
-- 🌈 **Appearance**: Customize `banner.py` for a unique look.
-- 🔍 **Search Engine**: Extend `ddg_search.py` to add more search providers.
+## 12. 🛠️ Customization Points
 
-## 🚀 Scaling Up
+- 🎭 **Personality**: Tweak `config.py` to adjust your AI's persona
+- 🧠 **AI Model**: Modify `ollama_client.py` to use different AI backends
+- 🌈 **Appearance**: Customize `banner.py` for a unique look
+- 🔍 **Search Engine**: Extend `ddg_search.py` to add more search providers
+
+## 13. 🚀 Scaling Up
 
 As your AI assistant grows, consider:
 
@@ -111,7 +130,7 @@ As your AI assistant grows, consider:
 4. 🔒 Enhanced security features
 5. 🔧 Performance optimizations for large-scale deployments
 
-## 🎉 Conclusion
+## 14. 🎉 Conclusion
 
 Ollama_Agents is designed to be both powerful and playful. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. This architecture allows for easy customization and extension, making it a versatile platform for building AI assistants.
 
