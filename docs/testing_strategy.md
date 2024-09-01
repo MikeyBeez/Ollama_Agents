@@ -79,6 +79,8 @@ We use GitHub Actions for continuous integration. Tests are automatically run on
 
 We use coverage.py to measure code coverage. Aim for at least 80% coverage.
 
+```bash pip install coverage
+
 To run tests with coverage:
 
 ```bash
