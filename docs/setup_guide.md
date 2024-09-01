@@ -1,6 +1,3 @@
-1. `docs/setup_guide.md`:
-
-```markdown
 # 🛠️ AI_Functions Setup Guide
 
 This guide will help you set up your development environment for AI_Functions.
@@ -78,4 +75,3 @@ You're now ready to start developing with AI_Functions!
   `pip install --upgrade pip setuptools`
 
 For more help, please open an issue on the GitHub repository.
-```
