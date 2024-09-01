@@ -1,21 +1,20 @@
-# src/modules/save_history.py
+# save_history.py
 
-import json
-import os
 from datetime import datetime
 from pathlib import Path
-from config import MEMORY_LENGTH
+from config import MEMORY_LENGTH, DATA_DIR, CHAT_HISTORY_FILE
+from .file_utils import read_json_file, write_json_file, ensure_directory_exists
 import logging
 
 class ChatHistory:
     _instance = None
 
-    def __new__(cls, max_length):
+    def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ChatHistory, cls).__new__(cls)
-            cls._instance.max_length = max_length
+            cls._instance.max_length = MEMORY_LENGTH
             cls._instance.history = []
-            cls._instance.file_path = Path.home() / ".ai_functions_chat_history.json"
+            cls._instance.file_path = CHAT_HISTORY_FILE
             cls._instance.load_history()
         return cls._instance
 
@@ -29,52 +28,36 @@ class ChatHistory:
         return self.history
 
     def save_history(self):
-        with open(self.file_path, 'w', encoding='utf-8') as f:
-            json.dump(self.history, f, ensure_ascii=False, indent=2)
+        write_json_file(self.file_path, self.history)
 
     def load_history(self):
         if self.file_path.exists():
-            with open(self.file_path, 'r', encoding='utf-8') as f:
-                loaded_history = json.load(f)
-                # Ensure all entries are in the correct format
-                self.history = [
-                    {"prompt": entry["prompt"], "response": entry["response"]}
-                    for entry in loaded_history
-                    if isinstance(entry, dict) and "prompt" in entry and "response" in entry
-                ]
-            self.history = self.history[-self.max_length:]
+            loaded_history = read_json_file(self.file_path)
+            self.history = [
+                {"prompt": entry["prompt"], "response": entry["response"]}
+                for entry in loaded_history
+                if isinstance(entry, dict) and "prompt" in entry and "response" in entry
+            ][-self.max_length:]
 
-# Create a singleton instance of ChatHistory
-chat_history = ChatHistory(MEMORY_LENGTH)
+chat_history = ChatHistory()
 
 def save_memory(memory_type, content, username, model_name, metadata=None):
-    # Create the data directory if it doesn't exist
-    project_root = Path(__file__).parent.parent.parent
-    data_dir = project_root / "data" / "json_history"
-    data_dir.mkdir(parents=True, exist_ok=True)
-
-    # Generate a timestamp for the filename
+    ensure_directory_exists(DATA_DIR)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{timestamp}_{memory_type}.json"
-
-    # Prepare the data to be saved
     data = {
         "timestamp": datetime.now().isoformat(),
         "username": username,
         "model_name": model_name,
         "type": memory_type,
         "content": content,
-        "access_count": 0,  # Initialize access count
-        "permanent_marker": 0  # Initialize permanent marker
+        "access_count": 0,
+        "permanent_marker": 0
     }
     if metadata:
         data.update(metadata)
-
-    # Save the data as a JSON file
-    file_path = data_dir / filename
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
+    file_path = DATA_DIR / filename
+    write_json_file(file_path, data)
     logging.info(f"Saved memory: {filename}")
 
 def save_interaction(prompt, response, username, model_name):
