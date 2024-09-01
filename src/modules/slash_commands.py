@@ -1,8 +1,9 @@
 from typing import Callable, Dict
 from rich.console import Console
-from src.modules.command_functions import print_history, truncate_history, memory_search, memory_search_long, change_model_command, duck_duck_go_search, upload_document
-from src.modules.command_functions_2 import print_chunk_history
-from src.modules.command_functions_3 import fabric_command
+from src.modules.basic_commands import change_model_command, duck_duck_go_search
+from src.modules.document_commands import upload_document, print_chunk_history
+from src.modules.fabric_commands import fabric_command
+from src.modules.memory_commands import print_history, truncate_history, memory_search, memory_search_long
 
 console = Console()
 

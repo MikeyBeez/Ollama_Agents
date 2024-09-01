@@ -7,13 +7,14 @@ Welcome to AI_Functions! This repository allows you to create a spectacular AI a
 - 🎨 Colorful command-line interface
 - 🧠 Enhanced memory management
 - 🔍 Integrated DuckDuckGo search capabilities
-- 🛠️ Modular design for easy customization
-- 🔎 New memory search commands: `/ms` and `/msl`
+- 🛠️ Improved modular design for easy customization
+- 🔎 Memory search commands: `/ms` and `/msl`
 - 🧵 New `/fabric` command for using Fabric patterns
+- 📂 Refactored command structure for better organization
 
 ## 🌟 Key Features
 
-1. 📚 Modular Architecture: Each function is a separate module, making it easy to add, remove, or modify features.
+1. 📚 Modular Architecture: Each function is in a separate module, making it easy to add, remove, or modify features.
 2. 💬 Interactive CLI: Built with `prompt_toolkit` for a sci-fi movie-worthy experience!
 3. 🔐 Secure Configuration: Customize your AI's personality in `config.py`.
 4. 🧪 Comprehensive Testing: Because quality is our superpower!
@@ -104,6 +105,15 @@ Use the `/fabric` command to interact with Fabric patterns:
 2. Select a pattern from the list provided.
 3. Enter the input text for the selected pattern.
 4. The AI will process your input using the chosen Fabric pattern and return the result.
+
+## 📂 New File Structure
+
+The command functions have been reorganized into the following files for better maintainability:
+
+- `basic_commands.py`: Basic operations like changing models and web searches.
+- `document_commands.py`: Document handling operations like uploading and chunking.
+- `fabric_commands.py`: Fabric pattern-related commands.
+- `memory_commands.py`: Memory and history-related operations.
 
 ## 🤝 Contributing
 

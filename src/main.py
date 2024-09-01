@@ -8,8 +8,8 @@ from src.modules.banner import setup_console, print_welcome_banner, print_separa
 from src.modules.input import get_user_input
 from src.modules.ollama_client import process_prompt
 from src.modules.save_history import get_chat_history, save_interaction
-from src.modules.command_functions import memory_search, print_history
-from src.modules.command_functions_2 import upload_document, print_chunk_history
+from src.modules.memory_commands import memory_search, print_history
+from src.modules.document_commands import upload_document, print_chunk_history
 from src.modules.assemble import assemble_prompt_with_history
 from config import USER_NAME, DEFAULT_MODEL, AGENT_NAME
 
