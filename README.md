@@ -34,7 +34,7 @@ Welcome to AI_Functions! This repository allows you to create a spectacular AI a
 
 ### Setting Up the Environment
 
-1. Clone this repository:
+1. Fork and clone this repository:
    ```bash
    git clone https://github.com/yourusername/AI_Functions.git
    cd AI_Functions

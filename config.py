@@ -10,7 +10,7 @@ AGENT_NAME = os.getenv("AI_AGENT_NAME", "Otto")
 
 # Model configuration
 # Specify the default language model and embedding model to be used
-DEFAULT_MODEL = os.getenv("AI_DEFAULT_MODEL", "llama3.1:latest")
+DEFAULT_MODEL = "llama3.1:latest"
 EMBEDDING_MODEL = os.getenv("AI_EMBEDDING_MODEL", "nomic-embed-text")
 
 # Memory configuration
