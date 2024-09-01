@@ -3,6 +3,7 @@ aiohttp==3.10.5
 aiosignal==1.3.1
 annotated-types==0.7.0
 anyio==4.4.0
+async-timeout==4.0.3
 attrs==24.2.0
 bcrypt==4.2.0
 certifi==2024.8.30
@@ -14,6 +15,7 @@ dataclasses-json==0.6.7
 decorator==5.1.1
 Deprecated==1.2.14
 duckduckgo_search==6.2.11
+exceptiongroup==1.2.2
 fabric==3.2.2
 frozenlist==1.4.1
 h11==0.14.0
@@ -28,37 +30,35 @@ langchain-community==0.2.14
 langchain-core==0.2.36
 langchain-text-splitters==0.2.2
 langsmith==0.1.107
-markdown-it-py @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/markdown-it-py_1699237863445/work
+markdown-it-py==3.0.0
 marshmallow==3.22.0
-mdurl @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/mdurl_1699237660008/work
+mdurl==0.1.2
 multidict==6.0.5
 mypy-extensions==1.0.0
 nodeenv==1.9.1
-numpy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a51i_mbs7m/croot/numpy_and_numpy_base_1708638620867/work/dist/numpy-1.26.4-cp312-cp312-macosx_11_0_arm64.whl#sha256=37afb6b734a197702d848df93bd67c10b52f6467d56e518950d84b6b1c949d27
+numpy==1.24.4
 ollama==0.3.2
 orjson==3.10.7
 packaging==24.1
 paramiko==3.4.1
 primp==0.6.1
-prompt-toolkit @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c63v4kqjzr/croot/prompt-toolkit_1704404354115/work
+prompt_toolkit==3.0.47
 pycparser==2.22
 pydantic==2.8.2
 pydantic_core==2.20.1
-Pygments @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pygments_1699238063295/work
+Pygments==2.18.0
 PyNaCl==1.5.0
 pyright==1.1.378
 PyYAML==6.0.2
 requests==2.32.3
-rich @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_bcb8hqb_r4/croot/rich_1720637498249/work
+rich==13.8.0
 ruff==0.6.3
-setuptools==72.1.0
 sniffio==1.3.1
 SQLAlchemy==2.0.32
 tenacity==8.5.0
 typing-inspect==0.9.0
 typing_extensions==4.12.2
 urllib3==2.2.2
-wcwidth @ file:///Users/ktietz/demo/mc3/conda-bld/wcwidth_1629357192024/work
-wheel==0.43.0
+wcwidth==0.2.13
 wrapt==1.16.0
 yarl==1.9.4
