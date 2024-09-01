@@ -149,6 +149,63 @@ AI_Functions/
 ├── requirements.txt
 └── README.md
 ```
+## 📚 Additional Documentation
+
+To provide a deeper understanding of AI_Functions, we've expanded our documentation. These additional resources offer insights into the system's architecture, module interactions, and design principles.
+
+### 🏗️ Architecture Guide
+
+For a comprehensive overview of AI_Functions' structure and design, refer to our [Architecture Guide](docs/architecture_guide.md). This document covers:
+
+- 🔍 High-level system overview
+- 🧩 Detailed module descriptions and interactions
+- 🔄 Data flow through the system
+- 🛠️ Key design patterns and principles used
+- 🚀 Scalability and future expansion considerations
+
+The architecture guide is essential reading for developers looking to understand, modify, or extend AI_Functions.
+
+### 🧠 Core Components
+
+Detailed documentation for each core component is available:
+
+- [Input Module](docs/input_module.md): Handles user input processing and command routing
+- [Ollama Client](docs/ollama_client.md): Manages communication with the Ollama AI model
+- [Memory Search](docs/memory_search.md): Implements advanced memory retrieval functionality
+- [Document Processing](docs/document_processing.md): Covers document upload and chunking processes
+
+### 🛠️ Development Guides
+
+For contributors and developers:
+
+- [Setup Guide](docs/setup_guide.md): Detailed instructions for setting up the development environment
+- [Testing Strategy](docs/testing_strategy.md): Overview of our testing approach and guidelines for writing tests
+- [Contribution Guidelines](docs/contributing.md): How to contribute to AI_Functions effectively
+
+### 🔄 Workflow Diagrams
+
+Visual representations of key processes:
+
+- [User Interaction Workflow](docs/diagrams/user_interaction_workflow.png)
+- [Memory Search Process](docs/diagrams/memory_search_process.png)
+- [Document Upload and Processing](docs/diagrams/document_processing_workflow.png)
+
+These diagrams provide a clear visual understanding of the system's operations.
+
+### 📘 API Documentation
+
+For those integrating with AI_Functions:
+
+- [API Reference](docs/api_reference.md): Detailed documentation of public APIs and integration points
+
+### 🔮 Future Roadmap
+
+Explore our plans for future development:
+
+- [Roadmap](docs/roadmap.md): Upcoming features, improvements, and long-term vision for AI_Functions
+
+We encourage all users, developers, and contributors to explore these resources. They are designed to provide a comprehensive understanding of AI_Functions, from high-level architecture to specific implementation details.
+```
 
 ## 🤝 Contributing
 
