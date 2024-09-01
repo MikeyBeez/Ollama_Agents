@@ -1,41 +1,56 @@
 # src/main.py
 
-import sys
 import os
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from config import USER_NAME, AGENT_NAME, DEFAULT_MODEL, LOG_LEVEL, LOG_FILE
-import logging
-from src.modules.banner import setup_console, print_welcome_banner, print_separator
+import importlib
+from rich.console import Console
+from rich.prompt import IntPrompt
 from src.modules.input import get_user_input
-from src.modules.ollama_client import process_prompt
-from src.modules.save_history import chat_history
-from src.modules.assemble import assemble_prompt_with_history
+from src.modules.banner import setup_console, print_welcome_banner, print_separator
 
-# Setup logging
-logging.basicConfig(filename=LOG_FILE, level=LOG_LEVEL,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+def list_agents():
+    agents_dir = os.path.join(os.path.dirname(__file__), 'agents')
+    agent_files = [f[:-3] for f in os.listdir(agents_dir) if f.endswith('.py') and f != '__init__.py']
+    return agent_files
+
+def load_agent(agent_name):
+    module = importlib.import_module(f'src.agents.{agent_name}')
+    return getattr(module, 'main', None)
 
 def main():
-    console = setup_console()
-    print_welcome_banner(console, USER_NAME)
+    console = Console()
+    setup_console()
+    print_welcome_banner(console, "AI Agents")
     print_separator(console)
 
+    agents = list_agents()
+
     while True:
-        user_input = get_user_input()
-        if user_input is None:
+        console.print("Available agents:", style="bold cyan")
+        for i, agent in enumerate(agents, 1):
+            console.print(f"{i}. {agent}", style="yellow")
+        console.print("q. Quit", style="yellow")
+
+        choice = get_user_input()
+
+        if choice is None or choice.lower() == 'q':
             break
-        elif user_input == 'CONTINUE':
+
+        if choice == 'CONTINUE':
             continue
-        else:
-            print_separator(console)
-            current_prompt = f"You are {AGENT_NAME}, an AI assistant. {user_input}"
-            full_prompt = assemble_prompt_with_history(current_prompt)
-            response = process_prompt(full_prompt, DEFAULT_MODEL, USER_NAME)
-            chat_history.add_entry(user_input, response)
-        print_separator(console)
+
+        try:
+            agent_index = int(choice) - 1
+            if 0 <= agent_index < len(agents):
+                agent_name = agents[agent_index]
+                agent_main = load_agent(agent_name)
+                if agent_main:
+                    agent_main()
+                else:
+                    console.print(f"Error: No main function found in {agent_name}", style="bold red")
+            else:
+                console.print("Invalid agent selection.", style="bold red")
+        except ValueError:
+            console.print("Invalid input. Please enter a number or 'q'.", style="bold red")
 
     console.print("[bold red]Goodbye![/bold red]")
 

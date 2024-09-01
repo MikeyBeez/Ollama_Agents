@@ -7,6 +7,7 @@ This guide will help you set up your development environment for AI_Functions.
 - Python 3.8 or higher
 - pip (Python package manager)
 - Git
+- Ollama
 
 ## Step 1: Clone the Repository
 
@@ -42,8 +43,7 @@ ollama pull llama3.1:latest
 
 ## Step 5: Configure Environment Variables
 
-You can create a `.env` file in the project root to hide your configuration.
-You probably don't need this.
+Create a `.env` file in the project root to store your configuration:
 
 ```
 AI_USER_NAME=YourName
@@ -52,7 +52,23 @@ AI_DEFAULT_MODEL=llama3.1:latest
 AI_LOG_LEVEL=INFO
 ```
 
-## Step 6: Run Tests
+## Step 6: Set PYTHONPATH
+
+Add the following line to your `.bashrc`, `.zshrc`, or equivalent shell configuration file:
+
+```bash
+export PYTHONPATH=/path/to/your/AI_Functions:$PYTHONPATH
+```
+
+Replace `/path/to/your/AI_Functions` with the actual path to your project directory.
+
+After adding this line, restart your terminal or run:
+
+```bash
+source ~/.bashrc  # or source ~/.zshrc if you're using zsh
+```
+
+## Step 7: Run Tests
 
 Ensure everything is set up correctly by running the test suite:
 
@@ -60,10 +76,10 @@ Ensure everything is set up correctly by running the test suite:
 python -m unittest discover src/tests
 ```
 
-## Step 7: Run the Application
+## Step 8: Run the Application
 
 ```bash
-python src/main.py
+python -m src.main
 ```
 
 You're now ready to start developing with AI_Functions!

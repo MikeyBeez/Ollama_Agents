@@ -1,9 +1,11 @@
 # AI_Functions: Your Personal AI Assistant Builder 🤖
 
-Welcome to AI_Functions! This repository allows you to create a spectacular AI agent using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
+Welcome to AI_Functions! This repository allows you to create spectacular AI agents using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistants! 🧱✨
 
 ## 🚀 What's New?
 
+- 🎭 Multi-agent system: Interact with multiple AI personalities
+- 🔀 Easy agent selection from the main menu
 - 🎨 Colorful command-line interface
 - 🧠 Enhanced memory management
 - 🔍 Integrated DuckDuckGo search capabilities
@@ -23,6 +25,7 @@ Welcome to AI_Functions! This repository allows you to create a spectacular AI a
 6. 📜 Chat History: Never forget a conversation with built-in history management.
 7. 🧠 Memory Search: Quickly retrieve and utilize relevant information from past interactions and uploaded documents.
 8. 🧵 Fabric Integration: Use Fabric patterns for enhanced AI interactions.
+9. 🎭 Multi-Agent System: Interact with multiple AI personalities in one session.
 
 ## 🛠️ Getting Started
 
@@ -51,26 +54,31 @@ Welcome to AI_Functions! This repository allows you to create a spectacular AI a
    pip install -r requirements.txt
    ```
 
+4. Set up your PYTHONPATH:
+   ```bash
+   export PYTHONPATH=/path/to/your/AI_Functions:$PYTHONPATH
+   ```
+
 ### Installing Ollama
 
 1. Visit the [Ollama website](https://ollama.com/) and follow the installation instructions for your operating system.
 
-2. Once installed, run Ollama and download a model (e.g., llama2):
+2. Once installed, run Ollama and download a model (e.g., llama3.1:latest):
    ```bash
-   ollama run llama2
+   ollama run llama3.1:latest
    ```
 
 ### Configuration
 
 1. Customize your AI in `config.py`.
 
-2. Set up your API keys and other configurations in a `.env` file (use `.env.example` as a template). Currently only Ollama is supported.
+2. Set up your API keys and other configurations in a `.env` file (use `.env.example` as a template).
 
 ### Running the Application
 
 Run the main script:
 ```bash
-python src/main.py
+python -m src.main
 ```
 
 ## 🧪 Running Tests
@@ -108,104 +116,15 @@ Use the `/fabric` command to interact with Fabric patterns:
 3. Enter the input text for the selected pattern.
 4. The AI will process your input using the chosen Fabric pattern and return the result.
 
-## 📂 File Structure
+## 🎭 Multi-Agent System
 
-The project structure has been updated to include a comprehensive test suite and consolidated documentation:
+Our new multi-agent system allows you to interact with different AI personalities:
 
-```
-AI_Functions/
-├── src/
-│   ├── modules/
-│   │   ├── __init__.py
-│   │   ├── assemble.py
-│   │   ├── banner.py
-│   │   ├── basic_commands.py
-│   │   ├── chunk_history.py
-│   │   ├── ddg_search.py
-│   │   ├── document_commands.py
-│   │   ├── fabric_commands.py
-│   │   ├── file_utils.py
-│   │   ├── input.py
-│   │   ├── memory_commands.py
-│   │   ├── memory_search.py
-│   │   ├── ollama_client.py
-│   │   ├── save_history.py
-│   │   └── slash_commands.py
-│   ├── tests/
-│   │   ├── test_file_utils.py
-│   │   ├── test_input.py
-│   │   ├── test_memory_search.py
-│   │   ├── test_ollama_client.py
-│   │   └── test_save_history.py
-│   └── main.py
-├── docs/
-│   ├── architecture_guide.md
-│   ├── assemble_module.md
-│   ├── banner_module.md
-│   ├── ddg_search_module.md
-│   ├── input_module.md
-│   └── ollama_client.md
-├── config.py
-├── requirements.txt
-└── README.md
-```
-## 📚 Additional Documentation
-
-To provide a deeper understanding of AI_Functions, we've expanded our documentation. These additional resources offer insights into the system's architecture, module interactions, and design principles.
-
-### 🏗️ Architecture Guide
-
-For a comprehensive overview of AI_Functions' structure and design, refer to our [Architecture Guide](docs/architecture_guide.md). This document covers:
-
-- 🔍 High-level system overview
-- 🧩 Detailed module descriptions and interactions
-- 🔄 Data flow through the system
-- 🛠️ Key design patterns and principles used
-- 🚀 Scalability and future expansion considerations
-
-The architecture guide is essential reading for developers looking to understand, modify, or extend AI_Functions.
-
-### 🧠 Core Components
-
-Detailed documentation for each core component is available:
-
-- [Input Module](docs/input_module.md): Handles user input processing and command routing
-- [Ollama Client](docs/ollama_client.md): Manages communication with the Ollama AI model
-- [Memory Search](docs/memory_search.md): Implements advanced memory retrieval functionality
-- [Document Processing](docs/document_processing.md): Covers document upload and chunking processes
-
-### 🛠️ Development Guides
-
-For contributors and developers:
-
-- [Setup Guide](docs/setup_guide.md): Detailed instructions for setting up the development environment
-- [Testing Strategy](docs/testing_strategy.md): Overview of our testing approach and guidelines for writing tests
-- [Contribution Guidelines](docs/contributing.md): How to contribute to AI_Functions effectively
-
-### 🔄 Workflow Diagrams
-
-Visual representations of key processes:
-
-- [User Interaction Workflow](docs/diagrams/user_interaction_workflow.png)
-- [Memory Search Process](docs/diagrams/memory_search_process.png)
-- [Document Upload and Processing](docs/diagrams/document_processing_workflow.png)
-
-These diagrams provide a clear visual understanding of the system's operations.
-
-### 📘 API Documentation
-
-For those integrating with AI_Functions:
-
-- [API Reference](docs/api_reference.md): Detailed documentation of public APIs and integration points
-
-### 🔮 Future Roadmap
-
-Explore our plans for future development:
-
-- [Roadmap](docs/roadmap.md): Upcoming features, improvements, and long-term vision for AI_Functions
-
-We encourage all users, developers, and contributors to explore these resources. They are designed to provide a comprehensive understanding of AI_Functions, from high-level architecture to specific implementation details.
-```
+1. Run the main script: `python -m src.main`
+2. Choose the multi-agent option from the menu.
+3. Select an agent to chat with (e.g., Alice, Bob, or Charlie).
+4. Chat with the selected agent.
+5. Type 'back' to return to the agent selection menu.
 
 ## 🤝 Contributing
 
