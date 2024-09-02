@@ -26,15 +26,11 @@ Ollama_Agents project:
 - **Purpose**: Library for building powerful interactive command-line applications
 - **Usage**: Employed in `input.py` to create an enhanced, interactive command-line interface with features like autocomplete, command history, and custom key bindings, significantly improving the user experience.
 
-## 7. pydantic
-- **Purpose**: Data validation and settings management using Python type annotations
-- **Usage**: While not directly visible in the provided code snippets, it's likely used for configuration management or data modeling in parts of the project not shown, ensuring type safety and validation.
-
-## 8. requests
+## 7. requiests
 - **Purpose**: HTTP library for making API requests
 - **Usage**: Used in `ollama_client.py` for making HTTP requests to the Ollama API, specifically for sending prompts and receiving streaming responses, enabling real-time interaction with the AI model.
 
-## 9. rich
+## 8. rich
 - **Purpose**: Library for rich text and beautiful formatting in the terminal
 - **Usage**: Extensively used throughout the project (e.g., in `banner.py`, `ollama_client.py`, `basic_commands.py`) to create colorful and visually appealing command-line output, including formatted text, panels, and live updates, enhancing the overall user interface.
 
