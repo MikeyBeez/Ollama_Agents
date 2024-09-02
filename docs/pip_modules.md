@@ -26,7 +26,7 @@ Ollama_Agents project:
 - **Purpose**: Library for building powerful interactive command-line applications
 - **Usage**: Employed in `input.py` to create an enhanced, interactive command-line interface with features like autocomplete, command history, and custom key bindings, significantly improving the user experience.
 
-## 7. requiests
+## 7. requests
 - **Purpose**: HTTP library for making API requests
 - **Usage**: Used in `ollama_client.py` for making HTTP requests to the Ollama API, specifically for sending prompts and receiving streaming responses, enabling real-time interaction with the AI model.
 
