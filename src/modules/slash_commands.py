@@ -6,6 +6,7 @@ from src.modules.basic_commands import change_model_command, duck_duck_go_search
 from src.modules.document_commands import upload_document, print_chunk_history
 from src.modules.fabric_commands import fabric_command
 from src.modules.memory_commands import print_history, truncate_history, memory_search, memory_search_long
+from src.modules.logging_setup import logger
 
 console = Console()
 
@@ -26,10 +27,12 @@ def get_help(command: str = '') -> str:
     /fabric - Run a Fabric pattern with interactive pattern selection
     """
     console.print(help_text, style="bold purple")
+    logger.info("Help command executed")
     return 'CONTINUE'
 
 def exit_program(command: str = '') -> str:
     console.print("Exiting program.", style="bold red")
+    logger.info("Exit command received")
     return 'EXIT'
 
 SLASH_COMMANDS: Dict[str, Callable[[str], str]] = {
@@ -56,7 +59,9 @@ def handle_slash_command(command: str) -> str:
     cmd_function = SLASH_COMMANDS.get(cmd)
 
     if cmd_function:
+        logger.info(f"Executing command: {cmd}")
         return cmd_function(command)
     else:
+        logger.warning(f"Unknown command received: {command}")
         console.print(f"Unknown command: {command}", style="bold red")
         return 'CONTINUE'

@@ -1,15 +1,14 @@
+# src/modules/ollama_client.py
+
 import requests
 import json
-import logging
 import shutil
 from rich.console import Console
 from rich.live import Live
 from rich.text import Text
 from rich.style import Style
 from .save_history import save_interaction
-
-logger = logging.getLogger(__name__)
-
+from .logging_setup import logger
 
 class TextStreamer:
     def __init__(self, width):
@@ -30,7 +29,6 @@ class TextStreamer:
             "\n".join(self.lines + [self.current_line]),
             style=self.style
         )
-
 
 class OllamaClient:
     def __init__(self, base_url="http://localhost:11434"):
@@ -70,19 +68,12 @@ class OllamaClient:
                                 if json_response.get("done", False):
                                     break
 
-                    # Log and save the interaction
-                    logger.info(
-                        f"Response generated for prompt: {prompt[:50]}..."
-                    )
-                    save_interaction(
-                        prompt, full_response.strip(), username, model
-                    )
+                    logger.info(f"Response generated for prompt: {prompt[:50]}...")
+                    save_interaction(prompt, full_response.strip(), username, model)
 
                     return full_response.strip()
                 else:
-                    error_msg = (
-                        f"Error: Received status code {response.status_code}"
-                    )
+                    error_msg = f"Error: Received status code {response.status_code}"
                     logger.error(error_msg)
                     self.console.print(error_msg, style="bold red")
                     return error_msg
@@ -92,10 +83,8 @@ class OllamaClient:
             self.console.print(error_msg, style="bold red")
             return error_msg
 
-
 # Create a default client instance
 default_client = OllamaClient()
-
 
 def process_prompt(prompt: str, model: str, username: str):
     logger.info(
@@ -103,7 +92,6 @@ def process_prompt(prompt: str, model: str, username: str):
         f"model={model}, username={username}"
     )
     return default_client.process_prompt(prompt, model, username)
-
 
 # Make sure to export the process_prompt function
 __all__ = ['process_prompt']

@@ -164,3 +164,4 @@ data/
 output.json
 .zed/
 .envrc
+logs/

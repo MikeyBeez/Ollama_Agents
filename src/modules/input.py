@@ -11,6 +11,7 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 from src.modules.slash_commands import handle_slash_command, SLASH_COMMANDS
+from src.modules.logging_setup import logger
 
 def get_user_input():
     prompt = f"{USER_NAME}> \n"
@@ -48,27 +49,35 @@ def get_user_input():
         user_input = session.prompt()
 
         if user_input.startswith('/'):
+            logger.info(f"Slash command received: {user_input}")
             result = handle_slash_command(user_input)
             if result == 'EXIT':
+                logger.info("Exit command received")
                 return None  # Exit the program
             return 'CONTINUE'  # For all other slash commands
 
+        logger.debug(f"User input received: {user_input[:50]}...")  # Log only first 50 characters
         return user_input
 
     except KeyboardInterrupt:
+        logger.info("Input interrupted by user (KeyboardInterrupt)")
         print("\nOperation cancelled by user.")
         return None
     except EOFError:
+        logger.info("EOF detected, exiting program")
         print("\nEOF detected. Exiting program.")
         return None
 
 # Example usage
 if __name__ == "__main__":
+    logger.info("Input module test started")
     print("Type /h or /help for available commands.")
     while True:
         result = get_user_input()
         if result is None:
+            logger.info("Input module test ended")
             break
         elif result == 'CONTINUE':
             continue
         print(f"You entered: {result}")
+    logger.info("Input module test completed")

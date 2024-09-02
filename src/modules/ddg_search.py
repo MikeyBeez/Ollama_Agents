@@ -1,18 +1,19 @@
-from langchain_community.tools import DuckDuckGoSearchRun
+# src/modules/ddg_search.py
+
+from duckduckgo_search import DDGS
+from src.modules.logging_setup import logger
+from src.modules.errors import APIConnectionError
 
 class DDGSearch:
     def __init__(self):
-        self.search = DuckDuckGoSearchRun()
+        self.ddgs = DDGS()
 
     def run_search(self, query):
         try:
-            results = self.search.run(query)
-            if isinstance(results, str):
-                results_list = results.split("\n")
-            else:
-                results_list = results
-            return results_list
+            logger.info(f"Initiating DuckDuckGo search for query: '{query[:50]}...'")
+            results = list(self.ddgs.text(query, max_results=5))
+            logger.info(f"Received {len(results)} results from DuckDuckGo")
+            return [result['title'] + ': ' + result['body'] for result in results]
         except Exception as e:
-            print(f"Error: {e}")
-            return []
-
+            logger.error(f"Error during DuckDuckGo search: {str(e)}")
+            raise APIConnectionError(f"Failed to perform DuckDuckGo search: {str(e)}")

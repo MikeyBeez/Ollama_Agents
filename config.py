@@ -22,7 +22,7 @@ CHUNK_LENGTH = int(os.getenv("AI_CHUNK_LENGTH", "10"))  # Number of chunks to ke
 
 # Path configuration
 # Define important directories and files used by the system
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / "data" / "json_history"
 EMBEDDINGS_DIR = DATA_DIR / "embeddings"
 
@@ -42,7 +42,7 @@ DEFAULT_SIMILARITY_THRESHOLD = float(os.getenv("AI_DEFAULT_SIMILARITY_THRESHOLD"
 
 # Logging configuration
 # Settings for system logging
-LOG_LEVEL = os.getenv("AI_LOG_LEVEL", "INFO")  # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+LOG_LEVEL = os.getenv("AI_LOG_LEVEL", "WARNING")  # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 LOG_FILE = PROJECT_ROOT / "logs" / "ollama_agents.log"  # Path to log file
 
 # Ensure log directory exists

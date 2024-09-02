@@ -1,28 +1,28 @@
-# memory_search.py
+# src/modules/memory_search.py
 
 import numpy as np
 from numpy.linalg import norm
 import ollama
 from typing import List, Tuple, Dict, Any
-import logging
 from config import DATA_DIR, EMBEDDINGS_DIR, EMBEDDING_MODEL
 from .file_utils import read_json_file, write_json_file, get_json_files_in_directory, increment_json_field
+from .logging_setup import logger
 
 def read_memory(filename: str) -> Dict[str, Any]:
     file_path = DATA_DIR / filename
     data = read_json_file(file_path)
     increment_json_field(file_path, 'access_count')
-    logging.debug(f"Read memory: {filename}, access count: {data['access_count']}")
+    logger.debug(f"Read memory: {filename}, access count: {data['access_count']}")
     return data
 
 def save_embeddings(filename: str, embeddings: List[float]) -> None:
     write_json_file(EMBEDDINGS_DIR / f"{filename}.json", embeddings)
-    logging.info(f"Saved embeddings for file: {filename}")
+    logger.info(f"Saved embeddings for file: {filename}")
 
 def load_embeddings(filename: str) -> List[float]:
     embeddings_file = EMBEDDINGS_DIR / f"{filename}.json"
     if not embeddings_file.exists():
-        logging.debug(f"No existing embeddings found for file: {filename}")
+        logger.debug(f"No existing embeddings found for file: {filename}")
         return []
     return read_json_file(embeddings_file)
 
@@ -41,7 +41,7 @@ def get_embeddings(filename: str) -> List[float]:
         text = str(memory_data['content'])
     embeddings = ollama.embeddings(model=EMBEDDING_MODEL, prompt=text)["embedding"]
     save_embeddings(filename, embeddings)
-    logging.info(f"Generated new embeddings for file: {filename}")
+    logger.info(f"Generated new embeddings for file: {filename}")
     return embeddings
 
 def find_most_similar(needle: List[float], haystack: List[List[float]]) -> List[Tuple[float, int]]:
@@ -52,7 +52,7 @@ def find_most_similar(needle: List[float], haystack: List[List[float]]) -> List[
     return sorted(zip(similarity_scores, range(len(haystack))), reverse=True)
 
 def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.0) -> List[Dict[str, Any]]:
-    logging.info(f"Searching memories for query: {query}")
+    logger.info(f"Searching memories for query: {query[:50]}...")  # Log only first 50 characters
     memory_files = get_json_files_in_directory(DATA_DIR)
     embeddings = [get_embeddings(f.name) for f in memory_files]
     query_embedding = ollama.embeddings(model=EMBEDDING_MODEL, prompt=query)["embedding"]
@@ -77,6 +77,7 @@ def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.
             "filename": filename
         })
 
+    logger.info(f"Found {len(relevant_memories)} relevant memories")
     return relevant_memories
 
 def generate_embeddings_for_existing_files():
@@ -84,7 +85,7 @@ def generate_embeddings_for_existing_files():
     for file in memory_files:
         if not load_embeddings(file.name):
             get_embeddings(file.name)
-    logging.info(f"Generated embeddings for {len(memory_files)} files")
+    logger.info(f"Generated embeddings for {len(memory_files)} files")
 
 # Run this function when the module is imported to ensure all files have embeddings
 generate_embeddings_for_existing_files()
