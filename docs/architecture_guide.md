@@ -1,10 +1,8 @@
 # 🏗️ Ollama_Agents: Comprehensive Architecture Guide 🤖
 
-Welcome to the magical world of Ollama_Agents! 🎉 This guide will take you on a journey through the architecture and components of our AI assistant builder. It's like having a LEGO set for AI - mix, match, and build your dream assistant! 🧱✨
-
 ## 1. 🌐 Overview
 
-Ollama_Agents is a modular and flexible framework for creating AI assistants. It leverages the Ollama API and is designed with extensibility in mind, allowing users to create and interact with multiple AI agents.
+Ollama_Agents is a modular and flexible framework for creating AI assistants. It leverages the Ollama API and is designed with extensibility in mind, allowing users to create and interact with multiple AI agents. The system now includes comprehensive logging for enhanced debugging and monitoring capabilities.
 
 ## 2. 🚀 Key Features
 
@@ -20,6 +18,7 @@ Ollama_Agents is a modular and flexible framework for creating AI assistants. It
 - 📜 Built-in chat history management
 - 🔎 Memory search commands: `/ms` and `/msl`
 - 🧵 Fabric pattern integration with `/fabric` command
+- 📊 Comprehensive logging system for debugging and monitoring
 
 ## 3. 🏗️ System Architecture
 
@@ -40,8 +39,10 @@ graph TD
     A --> L[File Utils]
     A --> M[Memory Search]
     A --> N[Fabric Commands]
+    A --> O[Logging System]
+    O --> P[Log Files]
     style A fill:#ff9999,stroke:#333,stroke-width:4px
-    style B,C,D,E,F,L,M,N fill:#99ff99,stroke:#333,stroke-width:2px
+    style B,C,D,E,F,L,M,N,O fill:#99ff99,stroke:#333,stroke-width:2px
 ```
 
 ## 4. 🧱 Core Components
@@ -49,10 +50,12 @@ graph TD
 ### 4.1 Main Application (`src/main.py`)
 - Entry point of the application
 - Manages the overall flow and agent selection
+- Initializes logging system
 
 ### 4.2 Agents (`src/agents/`)
 - `multi_agent.py`: Implements multi-agent functionality
 - `one_agent.py`: Implements single agent functionality
+- `simple_agent.py`: Basic agent implementation
 
 ### 4.3 Modules (`src/modules/`)
 - `assemble.py`: Handles prompt assembly and history management
@@ -69,6 +72,7 @@ graph TD
 - `ollama_client.py`: Manages communication with Ollama API
 - `save_history.py`: Handles saving and loading of chat history
 - `slash_commands.py`: Implements slash command processing
+- `logging_setup.py`: Configures and initializes the logging system
 
 ## 5. 🔄 Data Flow
 
@@ -78,6 +82,7 @@ graph TD
    a. Prompt assembly (`assemble.py`)
    b. API communication (`ollama_client.py`)
    c. Response processing and display
+4. Logging of operations and errors (`logging_setup.py`)
 
 ## 6. 🧠 Memory Management
 
@@ -113,14 +118,36 @@ graph TD
 - Covers core functionalities and modules
 - Run tests using: `python -m unittest discover src/tests`
 
-## 12. 🛠️ Customization Points
+## 12. 📊 Logging System
+
+### 12.1 Logging Setup (`logging_setup.py`)
+- Centralizes logging configuration
+- Initializes logger with appropriate log levels and handlers
+
+### 12.2 Logging in Modules
+- Each module uses the centralized logger
+- Logs function entries, exits, important operations, and errors
+
+### 12.3 Log Levels
+- DEBUG: Detailed debugging information
+- INFO: General information about program execution
+- WARNING: Unexpected occurrences that aren't errors
+- ERROR: Error events that might still allow the application to continue running
+- CRITICAL: Very severe error events that will likely lead to application failure
+
+### 12.4 Log Management
+- Log rotation implemented to manage file sizes
+- Regular log analysis for error patterns and performance issues
+
+## 13. 🛠️ Customization Points
 
 - 🎭 **Personality**: Tweak `config.py` to adjust your AI's persona
 - 🧠 **AI Model**: Modify `ollama_client.py` to use different AI backends
 - 🌈 **Appearance**: Customize `banner.py` for a unique look
 - 🔍 **Search Engine**: Extend `ddg_search.py` to add more search providers
+- 📊 **Logging**: Adjust log levels and formats in `logging_setup.py`
 
-## 13. 🚀 Scaling Up
+## 14. 🚀 Scaling Up
 
 As your AI assistant grows, consider:
 
@@ -129,10 +156,11 @@ As your AI assistant grows, consider:
 3. 🧠 Multiple AI models for specialized tasks
 4. 🔒 Enhanced security features
 5. 🔧 Performance optimizations for large-scale deployments
+6. 📡 Distributed logging for multi-server setups
 
-## 14. 🎉 Conclusion
+## 15. 🎉 Conclusion
 
-Ollama_Agents is designed to be both powerful and playful. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. This architecture allows for easy customization and extension, making it a versatile platform for building AI assistants.
+Ollama_Agents is designed to be both powerful and playful. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. The comprehensive logging system enhances debugging and monitoring capabilities, making the system more robust and maintainable. This architecture allows for easy customization and extension, making it a versatile platform for building AI assistants.
 
 Remember to keep your tests up-to-date as you add new features or modify existing ones. This will ensure the continued reliability and maintainability of your AI assistant.
 
