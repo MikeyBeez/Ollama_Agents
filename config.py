@@ -49,5 +49,5 @@ LOG_FILE = PROJECT_ROOT / "logs" / "ollama_agents.log"  # Path to log file
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 # Assistant command configurations
-TERMINAL_APP = ["open", "-a", "Warp"]
-DEFAULT_BROWSER = "safari"  # or whatever default browser you prefer
+TERMINAL_APP = ["open", "-a", "Terminal"]
+DEFAULT_BROWSER = "default"  # or whatever default browser you prefer

@@ -16,4 +16,4 @@ class DDGSearch:
             return [result['title'] + ': ' + result['body'] for result in results]
         except Exception as e:
             logger.error(f"Error during DuckDuckGo search: {str(e)}")
-            raise APIConnectionError(f"Failed to perform DuckDuckGo search: {str(e)}")
+            return []  # Return an empty list instead of raising an exception

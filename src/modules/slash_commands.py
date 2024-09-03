@@ -16,6 +16,7 @@ import pyautogui
 import subprocess
 import datetime
 import wikipedia
+from difflib import get_close_matches
 
 console = Console()
 
@@ -48,7 +49,7 @@ def exit_program(command: str = '') -> str:
 
 def assistant_command(command: str) -> str:
     logger.info(f"Executing assistant command: {command}")
-    command = command.lower().replace('/assistant', '').strip()
+    command = command.lower().replace('/assistant', '').replace('/as', '').strip()
 
     try:
         if 'open reddit' in command:
@@ -61,7 +62,7 @@ def assistant_command(command: str) -> str:
             console.print("Opening YouTube", style="bold green")
         elif 'time' in command:
             now = datetime.datetime.now()
-            time_answer = f'The time is {now.hour % 12}:{now.minute:02d}'
+            time_answer = f'The time is {now.strftime("%I:%M %p")}'
             console.print(Panel(time_answer, title="Current Time", border_style="bold blue"))
         elif 'look up' in command or 'lookup' in command:
             query = command.replace('look up', '').replace('lookup', '').strip()
@@ -75,15 +76,10 @@ def assistant_command(command: str) -> str:
         elif 'wikipedia' in command:
             query = command.replace('wikipedia', '').strip()
             try:
-                # Get the Wikipedia summary
                 result = wikipedia.summary(query, sentences=2)
                 console.print(Panel(result, title=f"Wikipedia: {query}", border_style="bold green"))
-
-                # Get the Wikipedia page URL
                 page = wikipedia.page(query)
                 url = page.url
-
-                # Open the Wikipedia page in the default web browser
                 webbrowser.open(url)
                 console.print(f"Opened Wikipedia page: {url}", style="bold blue")
             except wikipedia.exceptions.DisambiguationError as e:
@@ -96,13 +92,12 @@ def assistant_command(command: str) -> str:
             pyautogui.hotkey('winleft', 'up')
             console.print("Window maximized", style="bold green")
         elif 'minimize' in command:
-            pyautogui.hotkey('winleft', 'h')
+            pyautogui.hotkey('winleft', 'down')
             console.print("Window minimized", style="bold green")
         elif 'terminal' in command:
             subprocess.Popen(TERMINAL_APP)
-            console.print(f"Opening {TERMINAL_APP}", style="bold green")
+            console.print(f"Opening terminal", style="bold green")
         else:
-            # If no specific command is recognized, use Ollama to generate a response
             response = process_prompt(f"Assistant command: {command}", DEFAULT_MODEL, "User")
             console.print(Panel(response, title="AI Assistant", border_style="bold magenta"))
     except Exception as e:
@@ -149,6 +144,11 @@ def handle_slash_command(command: str) -> str:
             console.print("An unexpected error occurred. Please check the logs.", style="bold red")
             return 'CONTINUE'
     else:
-        logger.warning(f"Unknown command received: {command}")
-        console.print(f"Unknown command: {command}", style="bold red")
+        close_matches = get_close_matches(cmd, SLASH_COMMANDS.keys(), n=1, cutoff=0.6)
+        if close_matches:
+            logger.warning(f"Unknown command received: {command}. Did you mean {close_matches[0]}?")
+            console.print(f"Unknown command: {command}. Did you mean {close_matches[0]}?", style="bold yellow")
+        else:
+            logger.warning(f"Unknown command received: {command}")
+            console.print(f"Unknown command: {command}", style="bold red")
         return 'CONTINUE'
