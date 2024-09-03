@@ -2,11 +2,20 @@
 
 from typing import Callable, Dict
 from rich.console import Console
+from rich.panel import Panel
 from src.modules.basic_commands import change_model_command, duck_duck_go_search
 from src.modules.document_commands import upload_document, print_chunk_history
 from src.modules.fabric_commands import fabric_command
 from src.modules.memory_commands import print_history, truncate_history, memory_search, memory_search_long
 from src.modules.logging_setup import logger
+from src.modules.ollama_client import process_prompt
+from src.modules.errors import CommandExecutionError
+from config import TERMINAL_APP, DEFAULT_BROWSER, DEFAULT_MODEL
+import webbrowser
+import pyautogui
+import subprocess
+import datetime
+import wikipedia
 
 console = Console()
 
@@ -25,6 +34,7 @@ def get_help(command: str = '') -> str:
     /s query - Search DuckDuckGo for the given query
     /upload - Upload and process a document
     /fabric - Run a Fabric pattern with interactive pattern selection
+    /assistant <command> - Execute various assistant commands (e.g., open websites, look up information)
     """
     console.print(help_text, style="bold purple")
     logger.info("Help command executed")
@@ -34,6 +44,55 @@ def exit_program(command: str = '') -> str:
     console.print("Exiting program.", style="bold red")
     logger.info("Exit command received")
     return 'EXIT'
+
+def assistant_command(command: str) -> str:
+    logger.info(f"Executing assistant command: {command}")
+    command = command.lower().replace('/assistant', '').strip()
+
+    try:
+        if 'open reddit' in command:
+            url = 'https://www.reddit.com/'
+            webbrowser.get(DEFAULT_BROWSER).open(url)
+            console.print("Opening Reddit", style="bold green")
+        elif 'open youtube' in command:
+            url = 'https://www.youtube.com/'
+            webbrowser.get(DEFAULT_BROWSER).open(url)
+            console.print("Opening YouTube", style="bold green")
+        elif 'time' in command:
+            now = datetime.datetime.now()
+            time_answer = f'The time is {now.hour % 12}:{now.minute:02d}'
+            console.print(Panel(time_answer, title="Current Time", border_style="bold blue"))
+        elif 'look up' in command:
+            query = command.replace('look up', '').strip()
+            try:
+                result = wikipedia.summary(query, sentences=2)
+                console.print(Panel(result, title=f"Wikipedia: {query}", border_style="bold green"))
+            except wikipedia.exceptions.DisambiguationError as e:
+                console.print(f"Multiple results found. Please be more specific. Options: {e.options[:5]}", style="bold yellow")
+            except wikipedia.exceptions.PageError:
+                console.print(f"No results found for '{query}'", style="bold red")
+        elif 'maximize' in command:
+            pyautogui.hotkey('winleft', 'up')
+            console.print("Window maximized", style="bold green")
+        elif 'minimize' in command:
+            pyautogui.hotkey('winleft', 'h')
+            console.print("Window minimized", style="bold green")
+        elif 'terminal' in command:
+            try:
+                subprocess.call(TERMINAL_APP)
+                console.print(f"Opening {TERMINAL_APP[-1]}", style="bold green")
+            except Exception as e:
+                logger.error(f"Error opening terminal: {str(e)}")
+                console.print(f"Error opening terminal: {str(e)}", style="bold red")
+        else:
+            # If no specific command is recognized, use Ollama to generate a response
+            response = process_prompt(f"Assistant command: {command}", DEFAULT_MODEL, "User")
+            console.print(Panel(response, title="AI Assistant", border_style="bold magenta"))
+    except Exception as e:
+        logger.error(f"Error in assistant command: {str(e)}", exc_info=True)
+        raise CommandExecutionError(f"Failed to execute assistant command: {str(e)}")
+
+    return 'CONTINUE'
 
 SLASH_COMMANDS: Dict[str, Callable[[str], str]] = {
     '/h': get_help,
@@ -51,6 +110,7 @@ SLASH_COMMANDS: Dict[str, Callable[[str], str]] = {
     '/s': duck_duck_go_search,
     '/upload': upload_document,
     '/fabric': fabric_command,
+    '/assistant': assistant_command,
 }
 
 def handle_slash_command(command: str) -> str:
@@ -60,7 +120,16 @@ def handle_slash_command(command: str) -> str:
 
     if cmd_function:
         logger.info(f"Executing command: {cmd}")
-        return cmd_function(command)
+        try:
+            return cmd_function(command)
+        except CommandExecutionError as e:
+            logger.error(f"Command execution error: {str(e)}")
+            console.print(f"Error executing command: {str(e)}", style="bold red")
+            return 'CONTINUE'
+        except Exception as e:
+            logger.exception(f"Unexpected error in command execution: {str(e)}")
+            console.print("An unexpected error occurred. Please check the logs.", style="bold red")
+            return 'CONTINUE'
     else:
         logger.warning(f"Unknown command received: {command}")
         console.print(f"Unknown command: {command}", style="bold red")

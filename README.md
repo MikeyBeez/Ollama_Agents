@@ -1,8 +1,8 @@
-# Ollama_Agents: Your Personal AI Assistant Builder 🤖
+# 🤖 Ollama_Agents: Your Personal AI Assistant Builder 🚀
 
 Welcome to Ollama_Agents! This repository allows you to create spectacular AI agents using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistants! 🧱✨
 
-## 🚀 What's New?
+## 🌟 What's New?
 
 - 🎭 Multi-agent system: Interact with multiple AI personalities
 - 🔀 Easy agent selection from the main menu
@@ -14,8 +14,9 @@ Welcome to Ollama_Agents! This repository allows you to create spectacular AI ag
 - 🧵 New `/fabric` command for using Fabric patterns
 - 📂 Refactored command structure for better organization
 - 🧪 Comprehensive test suite added
+- 🤖 New `/assistant` command for various helpful functions
 
-## 🌟 Key Features
+## 🚀 Key Features
 
 1. 📚 Modular Architecture: Each function is in a separate module, making it easy to add, remove, or modify features.
 2. 💬 Interactive CLI: Built with `prompt_toolkit` for a sci-fi movie-worthy experience!
@@ -26,27 +27,29 @@ Welcome to Ollama_Agents! This repository allows you to create spectacular AI ag
 7. 🧠 Memory Search: Quickly retrieve and utilize relevant information from past interactions and uploaded documents.
 8. 🧵 Fabric Integration: Use Fabric patterns for enhanced AI interactions.
 9. 🎭 Multi-Agent System: Interact with multiple AI personalities in one session.
+10. 🤖 Assistant Command: Perform various tasks with a simple `/assistant` command.
 
 ## 🛠️ Getting Started
 
 ### Prerequisites
 
 - Python 3.8 or higher
-- Conda (for managing virtual environments)
-- Ollama (for running local language models)
+- pip (Python package manager)
+- Git
+- Ollama
 
 ### Setting Up the Environment
 
-1. Fork and clone this repository:
+1. Clone this repository:
    ```bash
    git clone https://github.com/yourusername/Ollama_Agents.git
    cd Ollama_Agents
    ```
 
-2. Create and activate a conda virtual environment:
+2. Create and activate a virtual environment:
    ```bash
-   conda create -n Ollama_Agents python=3.8
-   conda activate Ollama_Agents
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
    ```
 
 3. Install dependencies:
@@ -118,13 +121,26 @@ Use the `/fabric` command to interact with Fabric patterns:
 
 ## 🎭 Multi-Agent System
 
-Our new multi-agent system allows you to interact with different AI personalities:
+Our multi-agent system allows you to interact with different AI personalities:
 
 1. Run the main script: `python -m src.main`
 2. Choose the multi-agent option from the menu.
 3. Select an agent to chat with (e.g., Alice, Bob, or Charlie).
 4. Chat with the selected agent.
 5. Type 'back' to return to the agent selection menu.
+
+## 🤖 Assistant Command
+
+The `/assistant` command provides various helpful functions:
+
+- Open websites: `/assistant open reddit` or `/assistant open youtube`
+- Look up information: `/assistant look up [query]`
+- Get current time: `/assistant time`
+- Control windows: `/assistant maximize` or `/assistant minimize`
+- Open terminal: `/assistant terminal`
+- General queries: `/assistant [your question]`
+
+For any other queries, the assistant will use the AI model to generate a response.
 
 ## 🤝 Contributing
 

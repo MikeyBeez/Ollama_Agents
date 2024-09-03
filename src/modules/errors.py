@@ -17,3 +17,6 @@ class MemoryError(OllamaAgentsError):
 
 class FileOperationError(OllamaAgentsError):
     """Raised when there's an issue with file operations"""
+
+class CommandExecutionError(OllamaAgentsError):
+    """Raised when there's an error executing a command"""
