@@ -35,7 +35,7 @@ def get_help(command: str = '') -> str:
     /upload - Upload and process a document
     /fabric - Run a Fabric pattern with interactive pattern selection
     /assistant <command> - Execute various assistant commands (e.g., open websites, look up information)
-    /assistant wikipedia [query] - Look up a topic on Wikipedia and open the page
+    /as <command> - Execute various assistant commands (e.g., open websites, look up information)
     """
     console.print(help_text, style="bold purple")
     logger.info("Help command executed")
@@ -128,6 +128,7 @@ SLASH_COMMANDS: Dict[str, Callable[[str], str]] = {
     '/upload': upload_document,
     '/fabric': fabric_command,
     '/assistant': assistant_command,
+    '/as': assistant_command,
 }
 
 def handle_slash_command(command: str) -> str:
