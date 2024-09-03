@@ -1,100 +1,72 @@
-# src/agents/voice_agent.py
+# src/agents/V3.py
 
-import sys
-import os
 import asyncio
-import speech_recognition as sr
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
-from src.modules.voice_assist import initialize_whisper_models, listen, transcribe_audio, speak
+from src.modules.voice_assist import initialize, start_voice_assistant, speak, stop_voice_assistant, OllamaHandler
 from src.modules.logging_setup import logger
 from config import DEFAULT_MODEL
-from ollama import AsyncClient
+from rich.console import Console
 
-class VoiceAgent:
-    def __init__(self, wake_word='jarvis', model_name=DEFAULT_MODEL):
+console = Console()
+
+class V3Agent:
+    def __init__(self, wake_word='jarvis', quit_phrase='goodbye overlord', model_name=DEFAULT_MODEL):
         self.wake_word = wake_word
+        self.quit_phrase = quit_phrase
         self.model_name = model_name
-        self.ollama_client = AsyncClient()
-        self.r = sr.Recognizer()
-        self.tiny_model, self.base_model = initialize_whisper_models()
-        self.listening_for_wake_word = True
-        self.mic = sr.Microphone()
+        self.ollama_handler = OllamaHandler(model_name)
+        self.running = True
 
-    async def process_audio(self, audio):
-        if self.listening_for_wake_word:
-            await self.listen_for_wake_word(audio)
-        else:
-            await self.process_command(audio)
+    async def process_command(self, command: str):
+        current_sentence = ""
 
-    async def listen_for_wake_word(self, audio):
-        text = transcribe_audio(audio, self.tiny_model)
-        if self.wake_word.lower() in text.lower():
-            logger.info('Wake word detected')
-            print('Wake word detected. Please speak your command.')
-            speak('Listening')
-            self.listening_for_wake_word = False
+        def on_token(token: str):
+            nonlocal current_sentence
+            current_sentence += token
+            if token.endswith(('.', '!', '?', '\n')):
+                speak(current_sentence.strip())
+                current_sentence = ""
 
-    async def process_command(self, audio):
-        text = transcribe_audio(audio, self.base_model)
-        if not text.strip():
-            logger.warning('Empty command received')
-            speak('Sorry, I didn\'t catch that. Could you repeat?')
-            self.listening_for_wake_word = True
-            return
+        response = await self.ollama_handler.process_command(command, on_token)
 
-        logger.info(f'User command: {text}')
-        print('User:', text)
+        if current_sentence.strip():
+            speak(current_sentence.strip())
 
-        try:
-            response = await self.ollama_client.chat(model=self.model_name, messages=[
-                {
-                    'role': 'user',
-                    'content': text
-                }
-            ])
-            output = response['message']['content']
-            logger.info(f'Ollama response: {output}')
-            print('Assistant:', output)
-            speak(output)
-        except Exception as e:
-            logger.error(f'Error processing command: {str(e)}')
-            speak('Sorry, I encountered an error while processing your command.')
+        # Print wake word message after response is finished
+        console.print(f"\nSay '{self.wake_word}' to wake me up or '{self.quit_phrase}' to quit.", style="bold blue")
 
-        print(f'\nSay {self.wake_word} to wake me up. \n')
-        self.listening_for_wake_word = True
+        return response
 
     async def run(self):
-        with self.mic as source:
-            self.r.adjust_for_ambient_noise(source, duration=2)
+        logger.info("Initializing V3 Agent")
+        console.print("Initializing V3 Agent...", style="bold yellow")
+        initialize(self.wake_word, self.quit_phrase, self.process_command)
 
-        print(f'\nSay {self.wake_word} to wake me up. \n')
+        console.print(f"V3 Agent initialized. Say '{self.wake_word}' to wake me up or '{self.quit_phrase}' to quit.", style="bold green")
 
-        while True:
-            with self.mic as source:
-                try:
-                    audio = self.r.listen(source, timeout=5, phrase_time_limit=5)
-                    await self.process_audio(audio)
-                except sr.WaitTimeoutError:
-                    if not self.listening_for_wake_word:
-                        speak("Sorry, I didn't hear anything. Please try again.")
-                        self.listening_for_wake_word = True
-                except Exception as e:
-                    logger.error(f"Error listening: {str(e)}")
-                    speak("I'm having trouble listening. Please try again.")
-            await asyncio.sleep(0.1)
+        try:
+            await start_voice_assistant()
+        except Exception as e:
+            logger.error(f"Error in V3 Agent: {str(e)}")
+        finally:
+            await self.shutdown()
+
+    async def shutdown(self):
+        logger.info("Shutting down V3 Agent")
+        stop_voice_assistant()
+        console.print("V3 Agent stopped.", style="bold red")
 
 def run():
     try:
-        logger.info("Starting Voice Agent")
-        agent = VoiceAgent(wake_word='jarvis', model_name=DEFAULT_MODEL)
+        logger.info("Starting V3 Agent")
+        agent = V3Agent(wake_word='jarvis', quit_phrase='goodbye overlord', model_name=DEFAULT_MODEL)
         asyncio.run(agent.run())
+    except KeyboardInterrupt:
+        logger.info("V3 Agent interrupted by user")
+        console.print("V3 Agent interrupted by user.", style="bold yellow")
     except Exception as e:
-        logger.exception(f"Error in Voice Agent: {str(e)}")
-        print(f"An error occurred in the Voice Agent: {str(e)}")
-        print("Please check the logs for more details.")
+        logger.exception(f"Error in V3 Agent: {str(e)}")
+        console.print(f"An error occurred in the V3 Agent: {str(e)}", style="bold red")
+        console.print("Please check the logs for more details.", style="bold yellow")
 
 def main():
     run()

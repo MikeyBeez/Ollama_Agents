@@ -165,3 +165,6 @@ output.json
 .zed/
 .envrc
 logs/
+audio.wav
+command.wav
+wake_detect.wav
