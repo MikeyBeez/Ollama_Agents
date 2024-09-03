@@ -35,6 +35,7 @@ def get_help(command: str = '') -> str:
     /upload - Upload and process a document
     /fabric - Run a Fabric pattern with interactive pattern selection
     /assistant <command> - Execute various assistant commands (e.g., open websites, look up information)
+    /assistant wikipedia [query] - Look up a topic on Wikipedia and open the page
     """
     console.print(help_text, style="bold purple")
     logger.info("Help command executed")
@@ -62,8 +63,8 @@ def assistant_command(command: str) -> str:
             now = datetime.datetime.now()
             time_answer = f'The time is {now.hour % 12}:{now.minute:02d}'
             console.print(Panel(time_answer, title="Current Time", border_style="bold blue"))
-        elif 'look up' in command:
-            query = command.replace('look up', '').strip()
+        elif 'look up' in command or 'lookup' in command:
+            query = command.replace('look up', '').replace('lookup', '').strip()
             try:
                 result = wikipedia.summary(query, sentences=2)
                 console.print(Panel(result, title=f"Wikipedia: {query}", border_style="bold green"))
@@ -71,6 +72,26 @@ def assistant_command(command: str) -> str:
                 console.print(f"Multiple results found. Please be more specific. Options: {e.options[:5]}", style="bold yellow")
             except wikipedia.exceptions.PageError:
                 console.print(f"No results found for '{query}'", style="bold red")
+        elif 'wikipedia' in command:
+            query = command.replace('wikipedia', '').strip()
+            try:
+                # Get the Wikipedia summary
+                result = wikipedia.summary(query, sentences=2)
+                console.print(Panel(result, title=f"Wikipedia: {query}", border_style="bold green"))
+
+                # Get the Wikipedia page URL
+                page = wikipedia.page(query)
+                url = page.url
+
+                # Open the Wikipedia page in the default web browser
+                webbrowser.open(url)
+                console.print(f"Opened Wikipedia page: {url}", style="bold blue")
+            except wikipedia.exceptions.DisambiguationError as e:
+                console.print(f"Multiple results found. Please be more specific. Options: {e.options[:5]}", style="bold yellow")
+            except wikipedia.exceptions.PageError:
+                console.print(f"No results found for '{query}'", style="bold red")
+            except Exception as e:
+                console.print(f"An error occurred: {str(e)}", style="bold red")
         elif 'maximize' in command:
             pyautogui.hotkey('winleft', 'up')
             console.print("Window maximized", style="bold green")
@@ -78,12 +99,8 @@ def assistant_command(command: str) -> str:
             pyautogui.hotkey('winleft', 'h')
             console.print("Window minimized", style="bold green")
         elif 'terminal' in command:
-            try:
-                subprocess.call(TERMINAL_APP)
-                console.print(f"Opening {TERMINAL_APP[-1]}", style="bold green")
-            except Exception as e:
-                logger.error(f"Error opening terminal: {str(e)}")
-                console.print(f"Error opening terminal: {str(e)}", style="bold red")
+            subprocess.Popen(TERMINAL_APP)
+            console.print(f"Opening {TERMINAL_APP}", style="bold green")
         else:
             # If no specific command is recognized, use Ollama to generate a response
             response = process_prompt(f"Assistant command: {command}", DEFAULT_MODEL, "User")
