@@ -78,23 +78,34 @@ class SmartAgent:
             return handle_slash_command(command)
 
     def process_input(self, user_input: str) -> str:
+        console.print("[bold blue]Step 1: Analyzing input[/bold blue]")
         analysis = self.analyze_input(user_input)
+
+        console.print("[bold blue]Step 2: Gathering context[/bold blue]")
         self.gather_context(user_input, analysis)
 
+        console.print("[bold blue]Step 3: Conducting research[/bold blue]")
         research_results = self.conduct_research(user_input, analysis)
         self.context += f"\nResearch Results:\n{research_results}"
 
+        console.print("[bold blue]Step 4: Generating initial response[/bold blue]")
         initial_response = self.generate_response(user_input, self.context, analysis)
 
         if self.needs_clarification(initial_response):
+            console.print("[bold blue]Step 5: Requesting clarification[/bold blue]")
+            console.print(f"[bold magenta]{AGENT_NAME}: [/bold magenta]{initial_response}")
             clarification = get_user_input()
             if clarification is None or clarification == 'CONTINUE':
                 return "Clarification not provided. Please try asking your question again."
             self.context += f"\nClarification: {clarification}"
             return self.process_input(clarification)
 
+        console.print("[bold blue]Step 5: Refining response[/bold blue]")
         final_response = self.refine_response(user_input, initial_response, self.context)
+
+        console.print("[bold blue]Step 6: Updating chat history[/bold blue]")
         chat_history.add_entry(user_input, final_response)
+
         return final_response
 
     def analyze_input(self, user_input: str) -> Dict[str, Any]:
