@@ -8,9 +8,12 @@ import warnings
 from typing import Callable, Coroutine
 from src.modules.logging_setup import logger
 from rich.console import Console
+from rich.live import Live
+from rich.text import Text
 from ollama import AsyncClient
 from config import DEFAULT_MODEL
 
+# Suppress specific warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="whisper")
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch")
 
@@ -23,20 +26,29 @@ class OllamaHandler:
 
     async def process_command(self, command: str, on_token: Callable[[str], None]):
         try:
-            async for chunk in await self.ollama_client.chat(model=self.model_name, messages=[
-                {
-                    'role': 'user',
-                    'content': command
-                }
-            ], stream=True):
-                content = chunk['message']['content']
-                on_token(content)
-                await asyncio.sleep(0.01)  # Small delay for smooth output
+            logger.info(f"Processing command: {command}")
+            console.print(f"User: {command}", style="bold cyan")
 
-            return "Command processed successfully"
+            with Live(Text("Processing...", style="bold yellow"), refresh_per_second=4) as live:
+                full_response = ""
+                async for chunk in await self.ollama_client.chat(model=self.model_name, messages=[
+                    {
+                        'role': 'user',
+                        'content': command
+                    }
+                ], stream=True):
+                    content = chunk['message']['content']
+                    full_response += content
+                    live.update(Text(full_response, style="bold green"))
+                    on_token(content)
+                    await asyncio.sleep(0.01)  # Small delay for smooth output
+
+            logger.info(f"AI response: {full_response}")
+            return full_response
 
         except Exception as e:
             logger.error(f"Error processing command: {str(e)}")
+            console.print("Sorry, I encountered an error while processing your command.", style="bold red")
             return "Error processing command."
 
 class VoiceAssistant:
@@ -119,6 +131,7 @@ def speak(text: str):
     clean_text = ''.join(c for c in text if c in ALLOWED_CHARS)
     os.system(f"say '{clean_text}'")
 
+# Global voice assistant instance
 voice_assistant = None
 
 def initialize(wake_word: str, quit_phrase: str, on_command: Callable[[str], Coroutine]):

@@ -1,7 +1,7 @@
 # src/agents/V3.py
 
 import asyncio
-from src.modules.voice_assist import initialize, start_voice_assistant, speak, stop_voice_assistant, OllamaHandler
+from src.modules.voice_assist1 import initialize, start_voice_assistant, speak, stop_voice_assistant, OllamaHandler
 from src.modules.logging_setup import logger
 from config import DEFAULT_MODEL
 from rich.console import Console

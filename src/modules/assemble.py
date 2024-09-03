@@ -8,7 +8,7 @@ from src.modules.chunk_history import assemble_chunks
 from src.modules.save_history import get_chat_history
 from src.modules.logging_setup import logger
 
-def assemble_prompt_with_history(current_prompt: str) -> str:
+def assemble_prompt_with_history(current_prompt: str, chat_history_only: bool = False) -> str:
     logger.info("Assembling prompt with history")
     chat_history = get_chat_history()
     logger.debug(f"Retrieved {len(chat_history)} entries from chat history")
@@ -17,10 +17,13 @@ def assemble_prompt_with_history(current_prompt: str) -> str:
     history_prompts_str = "\n\n".join(history_prompts)
     logger.debug(f"Assembled history prompts (first 100 chars): {history_prompts_str[:100]}...")
 
-    chunk_history_str = assemble_chunks()
-    logger.debug(f"Assembled chunk history (first 100 chars): {chunk_history_str[:100]}...")
+    if chat_history_only:
+        assembled_prompt = f"{history_prompts_str}\n\nUser: {current_prompt}\nAssistant:"
+    else:
+        chunk_history_str = assemble_chunks()
+        logger.debug(f"Assembled chunk history (first 100 chars): {chunk_history_str[:100]}...")
+        assembled_prompt = f"{history_prompts_str}\n\nChunk History:\n{chunk_history_str}\n\nUser: {current_prompt}\nAssistant:"
 
-    assembled_prompt = f"{history_prompts_str}\n\nChunk History:\n{chunk_history_str}\n\nUser: {current_prompt}\nAssistant:"
     logger.info(f"Final assembled prompt length: {len(assembled_prompt)} characters")
     return assembled_prompt
 
