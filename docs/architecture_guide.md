@@ -19,6 +19,7 @@ Ollama_Agents is a modular and flexible framework for creating AI assistants. It
 - 🔎 Memory search commands: `/ms` and `/msl`
 - 🧵 Fabric pattern integration with `/fabric` command
 - 🤖 Assistant command functionality
+- 🎙️ Voice interaction capabilities
 
 ## 3. 🏗️ System Architecture
 
@@ -34,15 +35,19 @@ graph TD
     B --> G[User Interface]
     C --> H[AI Model]
     D --> I[Chat History]
-    E --> J[Visual Elements]
-    F --> K[Web Search]
-    A --> L[File Utils]
-    A --> M[Memory Search]
-    A --> N[Fabric Commands]
-    A --> O[Assistant Commands]
-    O --> P[Various Assistant Functions]
+    D --> J[Chunk History]
+    E --> K[Visual Elements]
+    F --> L[Web Search]
+    A --> M[File Utils]
+    A --> N[Memory Search]
+    A --> O[Fabric Commands]
+    A --> P[Assistant Commands]
+    P --> Q[Various Assistant Functions]
+    A --> R[Voice Assist]
+    R --> S[Speech Recognition]
+    R --> T[Text-to-Speech]
     style A fill:#ff9999,stroke:#333,stroke-width:4px
-    style B,C,D,E,F,L,M,N,O fill:#99ff99,stroke:#333,stroke-width:2px
+    style B,C,D,E,F,M,N,O,P,R fill:#99ff99,stroke:#333,stroke-width:2px
 ```
 
 ## 4. 🧱 Core Components
@@ -56,6 +61,7 @@ graph TD
 - `multi_agent.py`: Implements multi-agent functionality
 - `one_agent.py`: Implements single agent functionality
 - `simple_agent.py`: Basic agent implementation
+- `v_agent2.py`: Voice-enabled agent implementation
 
 ### 4.3 Modules (`src/modules/`)
 - `assemble.py`: Handles prompt assembly and history management
@@ -73,6 +79,7 @@ graph TD
 - `save_history.py`: Handles saving and loading of chat history
 - `slash_commands.py`: Implements slash command processing
 - `logging_setup.py`: Configures and initializes the logging system
+- `voice_assist.py`: Handles voice interaction capabilities
 
 ## 5. 🔄 Data Flow
 
@@ -89,6 +96,7 @@ graph TD
 - Short-term memory: Managed in `save_history.py`
 - Long-term memory: Implemented through document chunks and embeddings
 - Memory search: Implemented in `memory_search.py`
+- Flexible prompt assembly: `assemble.py` allows including or excluding chunk history
 
 ## 7. 🔍 Search Functionality
 
@@ -101,86 +109,44 @@ graph TD
 - Interactive input handling (`input.py`)
 - Customizable prompt style
 
-## 9. 🔧 Extensibility
+## 9. 🎙️ Voice Interaction
+
+- Speech recognition: Implemented in `voice_assist.py`
+- Text-to-speech: Integrated for spoken responses
+- Wake word detection: Allows hands-free activation
+
+## 10. 🔧 Extensibility
 
 - New agents can be added to the `agents/` directory
 - Additional modules can be integrated into the `modules/` directory
 - Fabric patterns can be added through the `/fabric` command
 - Assistant commands can be extended in `slash_commands.py`
 
-## 10. 🔐 Configuration
+## 11. 🔐 Configuration
 
 - Central configuration managed in `config.py`
 - Environment variables for sensitive information
 
-## 11. 🧪 Testing
+## 12. 🧪 Testing
 
 - Comprehensive test suite in `src/tests/`
 - Covers core functionalities and modules
 - Run tests using: `python -m unittest discover src/tests`
 
-## 12. 🤖 Assistant Command Functionality
+## 13. 🤖 Assistant Command Functionality
 
 The `/assistant` command provides a flexible way to add various helper functions to the Ollama_Agents system. This functionality is primarily implemented in the `slash_commands.py` file.
 
-### 12.1 Structure of Assistant Commands
-
-Assistant commands are handled within the `assistant_command` function in `slash_commands.py`. The function uses a series of conditional statements to determine which specific assistant action to perform based on the user's input.
-
-### 12.2 Adding New Assistant Commands
-
-To add a new assistant command:
-
-1. Open `src/modules/slash_commands.py`.
-2. Locate the `assistant_command` function.
-3. Add a new `elif` condition for your command. For example:
-
-   ```python
-   elif 'your_new_command' in command:
-       # Implement your command logic here
-       console.print("Your new command executed successfully", style="bold green")
-   ```
-
-4. If your command requires external libraries or complex logic, consider creating a separate function or even a new module, and call it from within the `assistant_command` function.
-
-### 12.3 Testing Assistant Commands
-
-To test new assistant commands:
-
-1. Open `src/tests/test_assistant_commands.py`.
-2. Add a new test method for your command. For example:
-
-   ```python
-   @patch('your_mocked_dependency')
-   def test_your_new_command(self, mock_dependency):
-       mock_dependency.return_value = "Expected result"
-       result = assistant_command('/assistant your_new_command')
-       self.assertEqual(result, 'CONTINUE')
-       # Add more assertions as needed
-   ```
-
-3. Run the tests using:
-   ```
-   python -m unittest src/tests/test_assistant_commands.py
-   ```
-
-### 12.4 Best Practices for Assistant Commands
-
-- Keep each command focused on a single task.
-- Use clear and descriptive names for your commands.
-- Implement proper error handling and provide user-friendly error messages.
-- Update the help documentation when adding new commands.
-- Consider the security implications of each command, especially if it interacts with the file system or external services.
-
-## 13. 🛠️ Customization Points
+## 14. 🛠️ Customization Points
 
 - 🎭 **Personality**: Tweak `config.py` to adjust your AI's persona
 - 🧠 **AI Model**: Modify `ollama_client.py` to use different AI backends
 - 🌈 **Appearance**: Customize `banner.py` for a unique look
 - 🔍 **Search Engine**: Extend `ddg_search.py` to add more search providers
 - 🤖 **Assistant Commands**: Add new commands in `slash_commands.py`
+- 🎙️ **Voice Interaction**: Customize wake words and voice settings in `voice_assist.py`
 
-## 14. 🚀 Scaling Up
+## 15. 🚀 Scaling Up
 
 As your AI assistant grows, consider:
 
@@ -189,10 +155,11 @@ As your AI assistant grows, consider:
 3. 🧠 Multiple AI models for specialized tasks
 4. 🔒 Enhanced security features
 5. 🔧 Performance optimizations for large-scale deployments
+6. 🌍 Multilingual support for voice and text interactions
 
-## 15. 🎉 Conclusion
+## 16. 🎉 Conclusion
 
-Ollama_Agents is designed to be both powerful and playful. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. The assistant command functionality adds another layer of versatility, allowing for easy expansion of the system's capabilities.
+Ollama_Agents is designed to be both powerful and flexible. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. The modular architecture allows for easy customization and extension, making it adaptable to a wide range of use cases and requirements.
 
 Remember to keep your tests up-to-date as you add new features or modify existing ones. This will ensure the continued reliability and maintainability of your AI assistant.
 
