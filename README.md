@@ -134,7 +134,7 @@ Our multi-agent system allows you to interact with different AI personalities:
 The `/assistant` command provides various helpful functions:
 
 - Open websites: `/assistant open reddit` or `/assistant open youtube`
-- Look up information: `/assistant look up [query]`
+- Look up information on wikipedia: `/assistant look up [query]`
 - Get current time: `/assistant time`
 - Control windows: `/assistant maximize` or `/assistant minimize`
 - Open terminal: `/assistant terminal`
