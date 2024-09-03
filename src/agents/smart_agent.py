@@ -5,7 +5,7 @@ import os
 from typing import List, Dict, Any
 import json
 from rich.console import Console
-from rich.prompt import Prompt
+from rich.prompt import Confirm
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -17,6 +17,7 @@ from src.modules.memory_search import search_memories
 from src.modules.save_history import chat_history
 from src.modules.document_commands import upload_document
 from src.modules.slash_commands import handle_slash_command
+from src.modules.input import get_user_input
 from config import DEFAULT_MODEL, AGENT_NAME, USER_NAME
 
 console = Console()
@@ -28,13 +29,21 @@ class SmartAgent:
         self.context = ""
 
     def run(self):
-        console.print(f"[bold green]{AGENT_NAME} initialized. Type 'exit' to quit or '/help' for commands.[/bold green]")
+        console.print(f"[bold green]{AGENT_NAME} initialized. Type '/q' to quit or '/help' for commands.[/bold green]")
         while True:
-            user_input = console.input(f"[bold cyan]{USER_NAME}: [/bold cyan]")
-            if user_input.lower() == 'exit':
-                break
+            if not self.context:
+                clear_history = Confirm.ask("Do you want to clear the chat history before asking your question?")
+                if clear_history:
+                    chat_history.clear()
+                    console.print("[bold green]Chat history cleared.[/bold green]")
 
-            if user_input.startswith('/'):
+            user_input = get_user_input()
+
+            if user_input is None:
+                break
+            elif user_input == 'CONTINUE':
+                continue
+            elif user_input.startswith('/'):
                 response = self.handle_command(user_input)
             else:
                 response = self.process_input(user_input)
@@ -46,6 +55,7 @@ class SmartAgent:
     def handle_command(self, command: str) -> str:
         if command == '/help':
             return """Available commands:
+            /q, /quit, /exit: Exit the SmartAgent
             /search <query>: Perform a web search
             /context: Show current context
             /clear_context: Clear the current context
@@ -68,27 +78,23 @@ class SmartAgent:
             return handle_slash_command(command)
 
     def process_input(self, user_input: str) -> str:
-        # Step 1: Analyze the input
         analysis = self.analyze_input(user_input)
-
-        # Step 2: Retrieve relevant information
         self.gather_context(user_input, analysis)
 
-        # Step 3: Generate initial response or question
+        research_results = self.conduct_research(user_input, analysis)
+        self.context += f"\nResearch Results:\n{research_results}"
+
         initial_response = self.generate_response(user_input, self.context, analysis)
 
-        # Step 4: Determine if clarification is needed
         if self.needs_clarification(initial_response):
-            clarification = self.get_clarification(initial_response)
+            clarification = get_user_input()
+            if clarification is None or clarification == 'CONTINUE':
+                return "Clarification not provided. Please try asking your question again."
             self.context += f"\nClarification: {clarification}"
-            return self.process_input(clarification)  # Recursive call with clarification
+            return self.process_input(clarification)
 
-        # Step 5: Refine the response
         final_response = self.refine_response(user_input, initial_response, self.context)
-
-        # Step 6: Update chat history
         chat_history.add_entry(user_input, final_response)
-
         return final_response
 
     def analyze_input(self, user_input: str) -> Dict[str, Any]:
@@ -110,23 +116,40 @@ class SmartAgent:
             return {}
 
     def gather_context(self, user_input: str, analysis: Dict[str, Any]) -> None:
-        # Add relevant memories
         if analysis.get('requires_memory', False):
             memories = search_memories(user_input, top_k=3, similarity_threshold=0.7)
             memory_context = "\n".join([f"Memory: {m['content']}" for m in memories])
             self.context += f"\nRelevant memories:\n{memory_context}"
 
-        # Add web search results if not already searched
         if analysis.get('requires_search', False) and "Search results for" not in self.context:
             search_query = self.refine_search_query(user_input, analysis)
             search_results = self.ddg_search.run_search(search_query)
             filtered_results = self.filter_search_results(user_input, search_results)
             self.context += f"\nWeb search results:\n{filtered_results}"
 
-        # Add recent chat history
-        recent_history = chat_history.get_history()[-3:]  # Get last 3 interactions
+        recent_history = chat_history.get_history()[-3:]
         history_context = "\n".join([f"User: {h['prompt']}\n{AGENT_NAME}: {h['response']}" for h in recent_history])
         self.context += f"\nRecent conversation:\n{history_context}"
+
+    def conduct_research(self, user_input: str, analysis: Dict[str, Any]) -> str:
+        research_prompt = f"""Conduct comprehensive research on the topic: "{user_input}"
+        Consider the following aspects:
+        1. Latest developments and breakthroughs
+        2. Scientific studies and clinical trials
+        3. Expert opinions and consensus
+        4. Potential risks and benefits
+        5. Alternative approaches or treatments
+
+        Provide a concise summary of your findings:"""
+
+        research_results = process_prompt(research_prompt, self.model_name, "Researcher")
+
+        if analysis.get('requires_search', False):
+            search_results = self.ddg_search.run_search(user_input)
+            filtered_results = self.filter_search_results(user_input, search_results)
+            research_results += f"\n\nWeb Search Results:\n{filtered_results}"
+
+        return research_results
 
     def refine_search_query(self, user_input: str, analysis: Dict[str, Any]) -> str:
         refine_prompt = f"""Given the user query: '{user_input}'
@@ -137,7 +160,7 @@ class SmartAgent:
         return process_prompt(refine_prompt, self.model_name, "QueryRefiner").strip()
 
     def filter_search_results(self, query: str, results: List[str]) -> str:
-        result_text = "\n".join(results[:5])  # Limit to top 5 results
+        result_text = "\n".join(results[:5])
         filter_prompt = f"""Given the query: '{query}' and these search results:
         {result_text}
 
@@ -155,16 +178,19 @@ class SmartAgent:
         And this analysis:
         {json.dumps(analysis)}
 
-        Generate a thoughtful and relevant response. If you need more information to provide a complete answer,
-        ask a clarifying question instead of giving a full response:"""
+        Generate a comprehensive and informative response that:
+        1. Directly addresses the user's query
+        2. Incorporates relevant research findings
+        3. Provides clear explanations and examples
+        4. Offers practical advice or next steps
+        5. Acknowledges any limitations or uncertainties
+
+        If you need more information to provide a complete answer, ask a clarifying question instead of giving a full response:"""
 
         return process_prompt(response_prompt, self.model_name, "ResponseGenerator")
 
     def needs_clarification(self, response: str) -> bool:
-        return '?' in response and len(response.split()) < 20  # Simple heuristic
-
-    def get_clarification(self, question: str) -> str:
-        return console.input(f"[bold magenta]{AGENT_NAME}: [/bold magenta]{question}\n[bold cyan]{USER_NAME}: [/bold cyan]")
+        return '?' in response and len(response.split()) < 20
 
     def refine_response(self, user_input: str, initial_response: str, context: str) -> str:
         refine_prompt = f"""Given the user's input: "{user_input}"
@@ -172,12 +198,14 @@ class SmartAgent:
         And this context: {context}
 
         Refine the response to ensure it is:
-        1. Directly addressing the user's input
-        2. Factually accurate
-        3. Coherent and well-structured
-        4. Empathetic and appropriate in tone
+        1. Comprehensive and informative
+        2. Directly addressing the user's input
+        3. Factually accurate and up-to-date
+        4. Coherent and well-structured
+        5. Empathetic and appropriate in tone
+        6. Not repetitive
 
-        Refined response:"""
+        Provide only the refined response, without repeating the original input or initial response:"""
 
         return process_prompt(refine_prompt, self.model_name, "ResponseRefiner")
 

@@ -28,6 +28,10 @@ class ChatHistory:
     def get_history(self):
         return self.history
 
+    def clear(self):
+        self.history = []
+        self.save_history()
+
     def save_history(self):
         write_json_file(self.file_path, self.history)
         logger.info(f"Saved chat history to {self.file_path}")
