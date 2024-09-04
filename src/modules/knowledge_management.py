@@ -3,13 +3,56 @@
 from src.modules.logging_setup import logger
 from src.modules.ollama_client import process_prompt
 from src.modules.errors import ModelInferenceError, DataProcessingError
+import json
+from typing import List, Tuple
+from src.modules.errors import ModelInferenceError
 
-def classify_query_topic(query: str, model_name: str) -> str:
+class InputError(Exception):
+    """Raised when there's an issue with user input"""
+    pass
+
+def classify_query_topic(query: str, model_name: str) -> Tuple[str, float]:
+    if not query.strip():
+        raise InputError("Query cannot be empty")
+
     try:
-        classification_prompt = f"Classify the following query into a general topic area: {query}"
-        return process_prompt(classification_prompt, model_name, "TopicClassifier")
+        classification_prompt = f"""
+        Classify the following query into a general topic area: "{query}"
+
+        Provide your response in the following JSON format:
+        {{
+            "topic": "The most relevant topic",
+            "confidence": 0.95,
+            "alternative_topics": ["Topic 2", "Topic 3"]
+        }}
+
+        Ensure the confidence is a float between 0 and 1.
+        """
+
+        response = process_prompt(classification_prompt, model_name, "TopicClassifier")
+
+        # Parse the JSON response
+        import json
+        result = json.loads(response)
+
+        # Validate the response
+        if not all(key in result for key in ('topic', 'confidence', 'alternative_topics')):
+            raise ValueError("Invalid response format from model")
+
+        if not isinstance(result['confidence'], (int, float)) or not 0 <= result['confidence'] <= 1:
+            raise ValueError("Invalid confidence value")
+
+        return result['topic'], result['confidence']
+
+    except json.JSONDecodeError as e:
+        raise ModelInferenceError(f"Error parsing model response: {str(e)}")
     except Exception as e:
         raise ModelInferenceError(f"Error classifying query topic: {str(e)}")
+
+def get_alternative_topics(query: str, model_name: str) -> List[str]:
+    _, _ = classify_query_topic(query, model_name)  # This will raise an exception if there's an error
+    result = json.loads(process_prompt.last_response)  # Assuming process_prompt stores its last response
+    return result.get('alternative_topics', [])
 
 def determine_research_depth(query: str, model_name: str) -> int:
     try:

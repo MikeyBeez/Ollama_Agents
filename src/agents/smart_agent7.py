@@ -2,8 +2,8 @@
 
 import sys
 import os
+import subprocess
 from typing import List, Dict, Any
-from rich.console import Console
 from rich.prompt import Confirm
 
 # Add the project root to the Python path
@@ -15,16 +15,18 @@ from src.modules.save_history import chat_history
 from src.modules.document_commands import upload_document
 from src.modules.slash_commands import handle_slash_command
 from src.modules.input import get_user_input
+from src.modules.custom_console import CaptureConsole
+
+# Import from new modules
 from src.modules.knowledge_management import classify_query_topic, determine_research_depth, update_knowledge_base
 from src.modules.context_management import gather_context
 from src.modules.query_processing import process_user_input, evaluate, format_response, process_user_feedback
 from src.modules.research_tools import conduct_comprehensive_research
-from src.modules.ollama_client import process_prompt
+
 from src.modules.errors import OllamaAgentsError, InputError, LogicProcessingError
-from src.modules.voice_assist import speak
 from config import DEFAULT_MODEL, AGENT_NAME, USER_NAME
 
-console = Console()
+console = CaptureConsole()
 
 class SmartAgent:
     def __init__(self, model_name=DEFAULT_MODEL):
@@ -57,7 +59,7 @@ class SmartAgent:
                 response = self.handle_command(user_input)
             else:
                 response = self.process_input(user_input)
-            self.output_response(response)
+            self.output_response()
 
         console.print(f"[bold red]{AGENT_NAME} shutting down. Goodbye![/bold red]")
 
@@ -106,14 +108,6 @@ class SmartAgent:
             research_results = conduct_comprehensive_research(processed_input, topic, self.model_name)
             self.context += f"\nResearch Results:\n{research_results}"
 
-            if "how to" in processed_input.lower() or "steps to" in processed_input.lower():
-                how_to_instructions = self.find_how_to_instructions(processed_input)
-                self.context += f"\nHow-to Instructions:\n{how_to_instructions}"
-
-            if "cost" in processed_input.lower() or "price" in processed_input.lower() or "expensive" in processed_input.lower():
-                cost_analysis = self.analyze_costs(processed_input)
-                self.context += f"\nCost Analysis:\n{cost_analysis}"
-
             response = evaluate(processed_input, self.context, self.model_name)
 
             formatted_response = format_response(response, "concise summary", self.model_name)
@@ -135,52 +129,24 @@ class SmartAgent:
             logger.exception(f"Unexpected error: {str(e)}")
             return "I'm sorry, but an unexpected error occurred. Please try again or rephrase your question."
 
-    def find_how_to_instructions(self, query: str) -> str:
-        try:
-            search_query = f"how to {query}"
-            search_results = self.ddg_search.run_search(search_query)
-
-            instruction_prompt = f"""Based on the following search results, provide a clear and concise set of instructions for: {query}
-
-            Search Results:
-            {' '.join(search_results[:3])}
-
-            Please format the instructions as a numbered list, with each step on a new line.
-            """
-
-            instructions = process_prompt(instruction_prompt, self.model_name, "InstructionGenerator")
-            return instructions
-        except Exception as e:
-            logger.error(f"Error finding how-to instructions: {str(e)}")
-            return f"Error: Unable to find how-to instructions for {query}"
-
-    def analyze_costs(self, query: str) -> str:
-        try:
-            search_query = f"cost analysis {query}"
-            search_results = self.ddg_search.run_search(search_query)
-
-            cost_analysis_prompt = f"""Based on the following search results, provide a detailed cost analysis for: {query}
-
-            Search Results:
-            {' '.join(search_results[:3])}
-
-            Please include:
-            1. Estimated price range
-            2. Factors affecting the cost
-            3. Potential hidden or additional costs
-            4. Cost-saving tips (if applicable)
-            """
-
-            cost_analysis = process_prompt(cost_analysis_prompt, self.model_name, "CostAnalyzer")
-            return cost_analysis
-        except Exception as e:
-            logger.error(f"Error analyzing costs: {str(e)}")
-            return f"Error: Unable to perform cost analysis for {query}"
-
-    def output_response(self, response: str):
-        console.print(f"[bold magenta]{AGENT_NAME}: [/bold magenta]{response}")
+    def output_response(self):
+        output = console.get_captured_output()
         if self.speech_enabled:
-            speak(response)
+            self.speak(output)
+        console.clear_captured_output()
+
+    def speak(self, text: str):
+        try:
+            # Split the text into smaller chunks to avoid issues with long text
+            chunks = text.split('\n')
+            for chunk in chunks:
+                if chunk.strip():  # Only speak non-empty chunks
+                    cleaned_chunk = ''.join(char for char in chunk if char.isalnum() or char.isspace() or char in '.,?!-')
+                    subprocess.run(["say", cleaned_chunk])
+        except Exception as e:
+            logger.error(f"Error using text-to-speech: {str(e)}")
+            console.print("[bold red]Error: Unable to use text-to-speech. Continuing with text-only output.[/bold red]")
+            self.speech_enabled = False
 
     def get_help(self) -> str:
         return """
