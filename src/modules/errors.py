@@ -20,3 +20,12 @@ class FileOperationError(OllamaAgentsError):
 
 class CommandExecutionError(OllamaAgentsError):
     """Raised when there's an error executing a command"""
+
+class LogicProcessingError(OllamaAgentsError):
+    """Raised when there's an error in the logic processing steps"""
+
+class ModelInferenceError(OllamaAgentsError):
+    """Raised when there's an error during model inference"""
+
+class DataProcessingError(OllamaAgentsError):
+    """Raised when there's an error processing data"""

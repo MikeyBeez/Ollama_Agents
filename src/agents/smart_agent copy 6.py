@@ -4,6 +4,7 @@ import sys
 import os
 import subprocess
 from typing import List, Dict, Any
+from rich.console import Console
 from rich.prompt import Confirm
 
 # Add the project root to the Python path
@@ -15,7 +16,6 @@ from src.modules.save_history import chat_history
 from src.modules.document_commands import upload_document
 from src.modules.slash_commands import handle_slash_command
 from src.modules.input import get_user_input
-from src.modules.custom_console import CaptureConsole
 
 # Import from new modules
 from src.modules.knowledge_management import classify_query_topic, determine_research_depth, update_knowledge_base
@@ -26,7 +26,7 @@ from src.modules.research_tools import conduct_comprehensive_research
 from src.modules.errors import OllamaAgentsError, InputError, LogicProcessingError
 from config import DEFAULT_MODEL, AGENT_NAME, USER_NAME
 
-console = CaptureConsole()
+console = Console()
 
 class SmartAgent:
     def __init__(self, model_name=DEFAULT_MODEL):
@@ -45,11 +45,11 @@ class SmartAgent:
             self.conversation_history.clear()
             console.print("[bold green]Chat history cleared.[/bold green]")
 
-        self.speech_enabled = Confirm.ask("Do you want me to speak all output?")
+        self.speech_enabled = Confirm.ask("Do you want me to speak the responses?")
         if self.speech_enabled:
-            console.print("[bold green]Speech enabled. I will speak all output.[/bold green]")
+            console.print("[bold green]Speech enabled. I will speak my responses.[/bold green]")
         else:
-            console.print("[bold yellow]Speech disabled. I will only display text output.[/bold yellow]")
+            console.print("[bold yellow]Speech disabled. I will only display text responses.[/bold yellow]")
 
         while True:
             user_input = self.get_user_input()
@@ -59,7 +59,7 @@ class SmartAgent:
                 response = self.handle_command(user_input)
             else:
                 response = self.process_input(user_input)
-            self.output_response()
+            self.output_response(response)
 
         console.print(f"[bold red]{AGENT_NAME} shutting down. Goodbye![/bold red]")
 
@@ -97,7 +97,7 @@ class SmartAgent:
 
     def process_input(self, user_input: str) -> str:
         try:
-            logger.info(f"Processing user input: {user_input[:50]}...")
+            logger.info(f"Processing user input: {user_input[:50]}...")  # Log only first 50 characters
 
             processed_input = process_user_input(user_input)
             topic = classify_query_topic(processed_input, self.model_name)
@@ -125,24 +125,27 @@ class SmartAgent:
 
             return formatted_response
 
+        except InputError as e:
+            logger.error(f"Input error: {str(e)}")
+            return f"I'm sorry, but there was an issue with your input: {str(e)}"
+        except LogicProcessingError as e:
+            logger.error(f"Logic processing error: {str(e)}")
+            return f"I encountered an error while processing your request: {str(e)}"
+        except OllamaAgentsError as e:
+            logger.error(f"Ollama Agents error: {str(e)}")
+            return f"An error occurred: {str(e)}"
         except Exception as e:
             logger.exception(f"Unexpected error: {str(e)}")
             return "I'm sorry, but an unexpected error occurred. Please try again or rephrase your question."
 
-    def output_response(self):
-        output = console.get_captured_output()
+    def output_response(self, response: str):
+        console.print(f"[bold magenta]{AGENT_NAME}: [/bold magenta]{response}")
         if self.speech_enabled:
-            self.speak(output)
-        console.clear_captured_output()
+            self.speak(response)
 
     def speak(self, text: str):
         try:
-            # Split the text into smaller chunks to avoid issues with long text
-            chunks = text.split('\n')
-            for chunk in chunks:
-                if chunk.strip():  # Only speak non-empty chunks
-                    cleaned_chunk = ''.join(char for char in chunk if char.isalnum() or char.isspace() or char in '.,?!-')
-                    subprocess.run(["say", cleaned_chunk])
+            subprocess.run(["say", text])
         except Exception as e:
             logger.error(f"Error using text-to-speech: {str(e)}")
             console.print("[bold red]Error: Unable to use text-to-speech. Continuing with text-only output.[/bold red]")
