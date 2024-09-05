@@ -1,13 +1,14 @@
 # src/modules/context_management.py
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Sequence
 from rich.console import Console
 from src.modules.logging_setup import logger
 from src.modules.memory_search import search_memories
 from src.modules.save_history import chat_history
 from src.modules.ddg_search import DDGSearch
-from src.modules.errors import DataProcessingError
+from src.modules.errors import DataProcessingError, ModelInferenceError
 from src.modules.ollama_client import process_prompt
+from config import DEFAULT_MODEL
 
 console = Console()
 ddg_search = DDGSearch()
@@ -60,7 +61,7 @@ def gather_context(user_input: str, topic: str, current_context: str, agent_name
     except Exception as e:
         raise DataProcessingError(f"Error gathering context: {str(e)}")
 
-def build_context(model_name: str) -> str:
+def build_context(model_name: str = DEFAULT_MODEL) -> str:
     try:
         announce_step("Building Context")
         bullet_points = bullet_manager.get_bullet_points()
@@ -75,7 +76,7 @@ def build_context(model_name: str) -> str:
     except Exception as e:
         raise DataProcessingError(f"Error building context: {str(e)}")
 
-def rank_bullet_points(bullet_points: List[str]) -> List[str]:
+def rank_bullet_points(bullet_points: List[str], model_name: str = DEFAULT_MODEL) -> Sequence[str]:
     try:
         announce_step("Ranking Bullet Points")
         ranking_prompt = "Rank the following bullet points by relevance and importance:\n" + "\n".join(bullet_points)
@@ -87,7 +88,7 @@ def rank_bullet_points(bullet_points: List[str]) -> List[str]:
     except Exception as e:
         raise DataProcessingError(f"Error ranking bullet points: {str(e)}")
 
-def query_response(query_type: str, context: str, model_name: str) -> str:
+def query_response(query_type: str, context: str, model_name: str = DEFAULT_MODEL) -> str:
     try:
         announce_step(f"Generating {query_type.capitalize()} Query")
         query = process_prompt(f"Generate a {query_type} based on this context: {context}", model_name, "QueryGenerator")

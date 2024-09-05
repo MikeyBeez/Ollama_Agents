@@ -66,9 +66,9 @@ Welcome to Ollama_Agents! This repository allows you to create spectacular AI ag
 
 1. Visit the [Ollama website](https://ollama.com/) and follow the installation instructions for your operating system.
 
-2. Once installed, run Ollama and download a model (e.g., llama3.1:latest):
+2. Once installed, run Ollama and download a model (e.g., llama2:latest):
    ```bash
-   ollama run llama3.1:latest
+   ollama run llama2:latest
    ```
 
 ### Configuration
@@ -94,12 +94,24 @@ python -m unittest discover src/tests
 
 ## 📘 Module Documentation
 
-- 🎛️ [Input Module](docs/input_module.md)
-- 🤖 [Ollama Client](docs/ollama_client.md)
-- 🧩 [Assemble Module](docs/assemble_module.md)
-- 🎨 [Banner Module](docs/banner_module.md)
-- 🔍 [DuckDuckGo Search](docs/ddg_search_module.md)
-- 🏗️ [Architecture Guide](docs/architecture_guide.md)
+Detailed documentation for each module can be found in the `docs/` directory:
+
+- [Input Module](docs/input_module.md)
+- [Ollama Client](docs/ollama_client.md)
+- [Assemble Module](docs/assemble_module.md)
+- [Banner Module](docs/banner_module.md)
+- [DuckDuckGo Search](docs/ddg_search_module.md)
+- [Architecture Guide](docs/architecture_guide.md)
+- [Command Modules](docs/command_modules.md)
+- [Context Management](docs/context_management.md)
+- [Knowledge Management](docs/knowledge_management.md)
+- [Research Tools](docs/research_tools.md)
+- [Agent Tools](docs/agent_tools.md)
+- [Config File](docs/config_file.md)
+- [JSON Memory Guide](docs/json_memory_guide.md)
+- [Logging Guide](docs/logging_guide.md)
+- [Building Agents](docs/building_agents.md)
+- [Assistant User Guide](docs/assistant_user_guide.md)
 
 ## 🔍 Memory Search Commands
 
@@ -131,16 +143,7 @@ Our multi-agent system allows you to interact with different AI personalities:
 
 ## 🤖 Assistant Command
 
-The `/assistant` command provides various helpful functions:
-
-- Open websites: `/assistant open reddit` or `/assistant open youtube`
-- Look up information on wikipedia: `/assistant look up [query]`
-- Get current time: `/assistant time`
-- Control windows: `/assistant maximize` or `/assistant minimize`
-- Open terminal: `/assistant terminal`
-- General queries: `/assistant [your question]`
-
-For any other queries, the assistant will use the AI model to generate a response.
+The `/assistant` command provides various helpful functions. For details, see the [Assistant User Guide](docs/assistant_user_guide.md).
 
 ## 🤝 Contributing
 

@@ -1,40 +1,49 @@
+# src/modules/agent_tools.py
+
 import json
 from typing import Dict, Any, List
-from rich.console import Console
 from src.modules.ollama_client import process_prompt
 from src.modules.logging_setup import logger
 from src.modules.memory_search import search_memories
 from src.modules.save_history import chat_history
 from src.modules.ddg_search import DDGSearch
+from src.modules.input import get_user_input
 
-console = Console()
 ddg_search = DDGSearch()
 
 def analyze_input(user_input: str, model_name: str) -> Dict[str, Any]:
     analysis_prompt = f"""Analyze the following user input:
     "{user_input}"
-    Provide a JSON output with the following fields:
-    - input_type: The type of input (question, command, statement, etc.)
-    - topics: Main topics or keywords
-    - complexity: Low, medium, or high
-    - sentiment: Positive, negative, or neutral
-    - requires_search: true if web search might be helpful, false otherwise
-    - requires_memory: true if searching past interactions might be helpful, false otherwise"""
+    Provide your response in the following JSON format:
+    {{
+        "input_type": "The type of input (question, command, statement, etc.)",
+        "topics": ["Main topic 1", "Main topic 2"],
+        "complexity": "Low, medium, or high",
+        "sentiment": "Positive, negative, or neutral",
+        "requires_research": true or false
+    }}
+    """
 
     analysis_result = process_prompt(analysis_prompt, model_name, "Analyzer")
     try:
         return json.loads(analysis_result)
     except json.JSONDecodeError:
-        logger.error(f"Failed to parse analysis result: {analysis_result}")
-        return {}
+        logger.error(f"Failed to parse JSON: {analysis_result}")
+        return {
+            "input_type": "unknown",
+            "topics": [],
+            "complexity": "medium",
+            "sentiment": "neutral",
+            "requires_research": True
+        }
 
 def gather_context(user_input: str, analysis: Dict[str, Any], context: str, agent_name: str) -> str:
-    if analysis.get('requires_memory', False):
+    if analysis.get('requires_research', False):
         memories = search_memories(user_input, top_k=3, similarity_threshold=0.7)
         memory_context = "\n".join([f"Memory: {m['content']}" for m in memories])
         context += f"\nRelevant memories:\n{memory_context}"
 
-    if analysis.get('requires_search', False) and "Search results for" not in context:
+    if analysis.get('requires_research', False):
         search_query = refine_search_query(user_input, analysis)
         search_results = ddg_search.run_search(search_query)
         filtered_results = filter_search_results(user_input, search_results)
@@ -45,23 +54,6 @@ def gather_context(user_input: str, analysis: Dict[str, Any], context: str, agen
     context += f"\nRecent conversation:\n{history_context}"
 
     return context
-
-def refine_search_query(user_input: str, analysis: Dict[str, Any]) -> str:
-    refine_prompt = f"""Given the user query: '{user_input}'
-    and this analysis: {json.dumps(analysis)}
-    Generate a concise and specific web search query to find relevant information.
-    Query:"""
-
-    return process_prompt(refine_prompt, DEFAULT_MODEL, "QueryRefiner").strip()
-
-def filter_search_results(query: str, results: List[str]) -> str:
-    result_text = "\n".join(results[:5])
-    filter_prompt = f"""Given the query: '{query}' and these search results:
-    {result_text}
-
-    Provide a concise summary of the most relevant information:"""
-
-    return process_prompt(filter_prompt, DEFAULT_MODEL, "ResultFilter")
 
 def generate_response(user_input: str, context: str, analysis: Dict[str, Any], agent_name: str, model_name: str) -> str:
     response_prompt = f"""As {agent_name}, respond to the user's input:
@@ -104,6 +96,23 @@ def refine_response(user_input: str, initial_response: str, context: str, model_
 
     return process_prompt(refine_prompt, model_name, "ResponseRefiner")
 
+def refine_search_query(user_input: str, analysis: Dict[str, Any]) -> str:
+    refine_prompt = f"""Given the user query: '{user_input}'
+    and this analysis: {json.dumps(analysis)}
+    Generate a concise and specific web search query to find relevant information.
+    Query:"""
+
+    return process_prompt(refine_prompt, "DEFAULT_MODEL", "QueryRefiner")
+
+def filter_search_results(query: str, results: List[str]) -> str:
+    result_text = "\n".join(results[:5])
+    filter_prompt = f"""Given the query: '{query}' and these search results:
+    {result_text}
+
+    Provide a concise summary of the most relevant information:"""
+
+    return process_prompt(filter_prompt, "DEFAULT_MODEL", "ResultFilter")
+
 def evaluate_step(content: str, step_name: str, model_name: str) -> str:
     critique_prompt = f"""As a critic, evaluate the following {step_name}:
     {content}
@@ -134,8 +143,15 @@ def evaluate_step(content: str, step_name: str, model_name: str) -> str:
 
     judgment = process_prompt(judge_prompt, model_name, "Judge")
 
-    console.print(f"[bold yellow]Critique of {step_name}:[/bold yellow]\n{critique}")
-    console.print(f"[bold red]Contrary perspective on {step_name}:[/bold red]\n{contrary_view}")
-    console.print(f"[bold green]Judgment on {step_name}:[/bold green]\n{judgment}")
+    logger.info(f"Evaluation of {step_name}:")
+    logger.info(f"Critique: {critique}")
+    logger.info(f"Contrary perspective: {contrary_view}")
+    logger.info(f"Judgment: {judgment}")
 
     return judgment
+
+def request_user_clarification(questions: List[str]) -> str:
+    print("I need some clarification to better assist you:")
+    for i, question in enumerate(questions, 1):
+        print(f"{i}. {question}")
+    return get_user_input("Please provide additional information: ")

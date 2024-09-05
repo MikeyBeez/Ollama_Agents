@@ -2,7 +2,6 @@
 
 import sys
 import os
-import json
 from typing import List, Dict, Any
 from rich.console import Console
 from rich.prompt import Confirm
@@ -64,7 +63,9 @@ class SmartAgent:
 
     def get_user_input(self) -> str:
         while True:
-            user_input = input(f"{USER_NAME}> ")
+            user_input = get_user_input()
+            if user_input is None:
+                return None
             if user_input.strip() == "":
                 console.print("[bold yellow]Please enter a question or command. Type '/help' for available commands or '/q' to quit.[/bold yellow]")
             else:
