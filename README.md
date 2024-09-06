@@ -13,6 +13,10 @@ Welcome to Ollama_Agents! This repository allows you to create sophisticated AI 
 - 🔀 Interactive follow-up question handling
 - 🎨 Rich, colorful command-line interface with progress tracking
 - 🛠️ Modular design with improved error handling and logging
+- 🔍 Advanced Analogy Finding: Discover insightful analogies to explain complex concepts
+- 🚦 Contradiction Detection and Resolution: Identify and resolve conflicting information
+- 🧪 Hypothesis Generation and Testing: Create and evaluate hypotheses based on available data
+- 🔗 Causal Reasoning: Infer and analyze cause-and-effect relationships
 
 ## 🚀 Key Features
 
@@ -30,6 +34,10 @@ Welcome to Ollama_Agents! This repository allows you to create sophisticated AI 
 12. 🌳 Knowledge Tree: Dynamic generation and visualization of knowledge structures
 13. 🧐 Fact-Checking: Verify information and assess source credibility
 14. 👤 User Profiling: Adapt responses based on user expertise and interests
+15. 🔍 Advanced Analogy Finding: Discover insightful analogies to explain complex concepts
+16. 🚦 Contradiction Detection and Resolution: Identify and resolve conflicting information
+17. 🧪 Hypothesis Generation and Testing: Create and evaluate hypotheses based on available data
+18. 🔗 Causal Reasoning: Infer and analyze cause-and-effect relationships
 
 ## 💡 Why JSON-based Graph Knowledgebase?
 
@@ -103,20 +111,38 @@ python -m src.main
 
 Detailed documentation for each module can be found in the `docs/` directory:
 
+### Core Modules
 - [Input Module](docs/input_module.md)
 - [Ollama Client](docs/ollama_client.md)
 - [Assemble Module](docs/assemble_module.md)
 - [Banner Module](docs/banner_module.md)
 - [DuckDuckGo Search](docs/ddg_search_module.md)
+
+### Agent and Knowledge Management
+- [Agent Tools](docs/agent_tools.md)
+- [Knowledge Management](docs/knowledge_management.md)
+- [Context Management](docs/context_management.md)
+- [KB Graph](docs/kb_graph.md)
+
+### Reasoning and Analysis
+- [Causal Reasoning](docs/causal_reasoning.md)
+- [Hypothesis Testing](docs/hypothesis_testing.md)
+- [Research Tools](docs/research_tools.md)
+
+### System Architecture and Configuration
 - [Architecture Guide](docs/architecture_guide.md)
 - [Command Modules](docs/command_modules.md)
-- [Context Management](docs/context_management.md)
-- [Knowledge Management](docs/knowledge_management.md)
-- [Research Tools](docs/research_tools.md)
-- [Agent Tools](docs/agent_tools.md)
 - [Config File](docs/config_file.md)
+
+### Memory and History
 - [JSON Memory Guide](docs/json_memory_guide.md)
+- [Save History](docs/save_history.md)
+
+### Utility and Logging
 - [Logging Guide](docs/logging_guide.md)
+- [Error Handling](docs/error_handling.md)
+
+### User Guides
 - [Building Agents](docs/building_agents.md)
 - [Assistant User Guide](docs/assistant_user_guide.md)
 
@@ -171,6 +197,20 @@ Our multi-agent system allows you to interact with different AI personalities:
 3. Select an agent to chat with (e.g., Alice, Bob, or Charlie).
 4. Chat with the selected agent.
 5. Type 'back' to return to the agent selection menu.
+
+## 🛠️ Advanced Agent Tools
+
+Our `agent_tools.py` module now includes several advanced functions for sophisticated reasoning:
+
+- `find_analogies()`: Discovers insightful analogies to explain complex concepts
+- `detect_contradictions()`: Identifies conflicting information within a given dataset
+- `resolve_contradictions()`: Proposes resolutions for detected contradictions
+- `generate_hypotheses()`: Creates plausible hypotheses based on available data
+- `design_experiment()`: Outlines experimental procedures to test generated hypotheses
+- `infer_causal_relationships()`: Analyzes potential cause-and-effect relationships
+- `analyze_causal_chain()`: Examines the sequence of events in a causal chain
+
+These tools enable our agents to perform more nuanced and context-aware reasoning, leading to more insightful and comprehensive responses.
 
 ## 🤖 Assistant Command
 
