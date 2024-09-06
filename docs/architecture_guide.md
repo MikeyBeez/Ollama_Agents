@@ -2,165 +2,189 @@
 
 ## 1. 🌐 Overview
 
-Ollama_Agents is a modular and flexible framework for creating AI assistants. It leverages the Ollama API and is designed with extensibility in mind, allowing users to create and interact with multiple AI agents.
+Ollama_Agents is a sophisticated, modular framework for creating advanced AI assistants. It leverages the Ollama API and is designed with extensibility, debugging capabilities, and cognitive transparency in mind. The system's cornerstone is its unique JSON-based graph knowledgebase, providing a flexible and powerful way to represent and manage knowledge.
 
-## 2. 🚀 Key Features
+## 2. 🚀 Key Components
 
-- 🎭 Multi-agent system: Interact with multiple AI personalities
-- 🔀 Easy agent selection from the main menu
-- 🎨 Colorful command-line interface
-- 🧠 Enhanced memory management
-- 🔍 Integrated DuckDuckGo search capabilities
-- 🛠️ Modular design for easy customization
-- 💬 Interactive CLI built with `prompt_toolkit`
-- 🔐 Secure configuration options
-- 🧪 Comprehensive testing suite
-- 📜 Built-in chat history management
-- 🔎 Memory search commands: `/ms` and `/msl`
-- 🧵 Fabric pattern integration with `/fabric` command
-- 🤖 Assistant command functionality
-- 🎙️ Voice interaction capabilities
+- 🕸️ Graph Knowledgebase: Core component for storing and managing relational knowledge
+- 🧠 Debug Agent: Provides detailed visualization of the agent's cognitive processes
+- 🌳 Knowledge Management: Handles knowledge acquisition, storage, and retrieval
+- 🔍 Context Management: Manages conversation context and adapts it to user profiles
+- 🛠️ Agent Tools: A suite of utilities for various AI tasks
+- 🌐 Web Integration: Allows agents to perform web searches and fact-checking
+- 💬 Multi-Agent System: Enables interaction with multiple AI personalities
+- 🎨 Rich CLI: Provides an engaging and informative user interface
 
 ## 3. 🏗️ System Architecture
 
-Ollama_Agents is designed with modularity and flexibility in mind. Here's a high-level view of the components:
+Ollama_Agents uses a modular architecture for flexibility and ease of extension:
 
 ```mermaid
 graph TD
     A[Main Application] --> B[Input Module]
     A --> C[Ollama Client]
-    A --> D[Assemble Module]
-    A --> E[Banner Module]
-    A --> F[DuckDuckGo Search]
-    B --> G[User Interface]
-    C --> H[AI Model]
-    D --> I[Chat History]
-    D --> J[Chunk History]
-    E --> K[Visual Elements]
-    F --> L[Web Search]
-    A --> M[File Utils]
-    A --> N[Memory Search]
-    A --> O[Fabric Commands]
-    A --> P[Assistant Commands]
-    P --> Q[Various Assistant Functions]
-    A --> R[Voice Assist]
-    R --> S[Speech Recognition]
-    R --> T[Text-to-Speech]
+    A --> D[Debug Agent]
+    D --> E[Knowledge Management]
+    E --> P[Graph Knowledgebase]
+    D --> F[Context Management]
+    D --> G[Agent Tools]
+    D --> H[Web Integration]
+    B --> I[User Interface]
+    C --> J[AI Model]
+    E --> K[Knowledge Tree]
+    F --> L[Context Adaptation]
+    G --> M[Fact Checking]
+    G --> N[Concept Explanation]
+    H --> O[Web Search]
+    A --> Q[Multi-Agent System]
     style A fill:#ff9999,stroke:#333,stroke-width:4px
-    style B,C,D,E,F,M,N,O,P,R fill:#99ff99,stroke:#333,stroke-width:2px
+    style D fill:#ff9999,stroke:#333,stroke-width:4px
+    style P fill:#ff9999,stroke:#333,stroke-width:4px
 ```
 
 ## 4. 🧱 Core Components
 
-### 4.1 Main Application (`src/main.py`)
-- Entry point of the application
-- Manages the overall flow and agent selection
-- Initializes logging system
+### 4.1 Graph Knowledgebase (`src/modules/kb_graph.py`)
+- Implements a JSON-based graph structure for knowledge representation
+- Provides methods for adding, querying, and updating knowledge
+- Supports complex relationships between concepts
+- Enables efficient traversal and search of the knowledge graph
 
-### 4.2 Agents (`src/agents/`)
-- `multi_agent.py`: Implements multi-agent functionality
-- `one_agent.py`: Implements single agent functionality
-- `simple_agent.py`: Basic agent implementation
-- `v_agent2.py`: Voice-enabled agent implementation
+### 4.2 Debug Agent (`src/agents/debug_agent.py`)
+- Provides detailed visualization of the agent's cognitive processes
+- Handles user interactions and command processing
+- Manages the overall flow of information and decision-making
+- Integrates with the graph knowledgebase for knowledge retrieval and updates
 
-### 4.3 Modules (`src/modules/`)
-- `assemble.py`: Handles prompt assembly and history management
-- `banner.py`: Manages CLI visual elements
-- `basic_commands.py`: Implements core slash commands
-- `chunk_history.py`: Manages document chunk history
-- `ddg_search.py`: Integrates DuckDuckGo search functionality
-- `document_commands.py`: Handles document-related operations
-- `fabric_commands.py`: Integrates Fabric pattern functionality
-- `file_utils.py`: Provides file handling utilities
-- `input.py`: Manages user input processing
-- `memory_commands.py`: Implements memory-related operations
-- `memory_search.py`: Handles memory search functionality
-- `ollama_client.py`: Manages communication with Ollama API
-- `save_history.py`: Handles saving and loading of chat history
-- `slash_commands.py`: Implements slash command processing
-- `logging_setup.py`: Configures and initializes the logging system
-- `voice_assist.py`: Handles voice interaction capabilities
+### 4.3 Knowledge Management (`src/modules/knowledge_management.py`)
+- Interfaces with the graph knowledgebase for knowledge operations
+- Handles knowledge acquisition, validation, and integration
+- Generates and manages the knowledge tree
+- Provides functions for topic classification and summarization
+
+### 4.4 Context Management (`src/modules/context_management.py`)
+- Manages conversation context
+- Adapts context based on user profiles
+- Handles context prioritization and gap identification
+- Integrates context with the graph knowledgebase
+
+### 4.5 Agent Tools (`src/modules/agent_tools.py`)
+- Provides utility functions for various AI tasks
+- Includes tools for fact-checking, concept explanation, and response generation
+- Interfaces with the graph knowledgebase for information retrieval and validation
+
+### 4.6 Web Integration (`src/modules/ddg_search.py`)
+- Enables web searches using DuckDuckGo
+- Supports fact-checking and information gathering
+- Integrates search results with the graph knowledgebase
+
+### 4.7 Multi-Agent System (`src/agents/multi_agent.py`)
+- Manages multiple AI personalities
+- Allows switching between different agent personas
+- Integrates with the graph knowledgebase for personality-specific knowledge
 
 ## 5. 🔄 Data Flow
 
-1. User input (`input.py`) → Main application (`main.py`)
-2. Command processing (`slash_commands.py`) or agent interaction
-3. If agent interaction:
-   a. Prompt assembly (`assemble.py`)
-   b. API communication (`ollama_client.py`)
-   c. Response processing and display
-4. Logging of operations and errors (`logging_setup.py`)
+1. User input (`input.py`) → Debug Agent (`debug_agent.py`)
+2. Debug Agent coordinates processing through various modules
+3. Knowledge retrieval and update (`kb_graph.py`, `knowledge_management.py`)
+4. Context gathering and adaptation (`context_management.py`)
+5. Web search and fact-checking if necessary (`ddg_search.py`, `agent_tools.py`)
+6. Response generation (`agent_tools.py`)
+7. Knowledge graph update based on interaction (`kb_graph.py`)
+8. Output formatting and display (`debug_agent.py`)
 
-## 6. 🧠 Memory Management
+## 6. 🧠 Advanced Features
 
-- Short-term memory: Managed in `save_history.py`
-- Long-term memory: Implemented through document chunks and embeddings
-- Memory search: Implemented in `memory_search.py`
-- Flexible prompt assembly: `assemble.py` allows including or excluding chunk history
+### 6.1 Graph Knowledgebase
+- JSON-based graph structure for flexible knowledge representation
+- Supports complex, multi-dimensional relationships between concepts
+- Enables efficient querying and updating of interconnected information
+- Provides a clear, interpretable view of the AI's knowledge structure
 
-## 7. 🔍 Search Functionality
+### 6.2 Knowledge Tree
+- Dynamic generation and visualization of knowledge structures
+- Helps in organizing and connecting information within the graph knowledgebase
+- Provides a hierarchical view of the AI's knowledge
 
-- Memory search: `/ms` and `/msl` commands
-- Web search: Integrated through `ddg_search.py`
+### 6.3 Fact-Checking and Credibility Assessment
+- Verifies information against web sources and the graph knowledgebase
+- Assesses the credibility of sources and information
+- Updates the graph knowledgebase with credibility scores
 
-## 8. 🎨 User Interface
+### 6.4 User Profiling
+- Adapts responses based on user expertise level and interests
+- Personalizes the interaction experience
+- Stores user profiles within the graph knowledgebase for persistent adaptation
 
-- CLI interface with rich formatting (`banner.py`)
-- Interactive input handling (`input.py`)
-- Customizable prompt style
+### 6.5 Interactive Follow-up
+- Generates and handles follow-up questions
+- Deepens the conversation and exploration of topics
+- Uses the graph knowledgebase to generate relevant and insightful questions
 
-## 9. 🎙️ Voice Interaction
-
-- Speech recognition: Implemented in `voice_assist.py`
-- Text-to-speech: Integrated for spoken responses
-- Wake word detection: Allows hands-free activation
-
-## 10. 🔧 Extensibility
+## 7. 🔧 Extensibility
 
 - New agents can be added to the `agents/` directory
 - Additional modules can be integrated into the `modules/` directory
-- Fabric patterns can be added through the `/fabric` command
-- Assistant commands can be extended in `slash_commands.py`
+- The graph knowledgebase can be extended with new relationship types and properties
+- The debug agent can be extended with new commands and visualization tools
 
-## 11. 🔐 Configuration
+## 8. 🔐 Configuration and Security
 
 - Central configuration managed in `config.py`
 - Environment variables for sensitive information
+- Secure handling of user data and conversation history
+- Access controls for the graph knowledgebase to ensure data integrity
 
-## 12. 🧪 Testing
+## 9. 🧪 Testing and Quality Assurance
 
 - Comprehensive test suite in `src/tests/`
-- Covers core functionalities and modules
-- Run tests using: `python -m unittest discover src/tests`
+- Covers core functionalities, modules, and edge cases
+- Specific tests for graph knowledgebase operations
+- Regular testing ensures reliability and performance
 
-## 13. 🤖 Assistant Command Functionality
+## 10. 🚀 Future Enhancements
 
-The `/assistant` command provides a flexible way to add various helper functions to the Ollama_Agents system. This functionality is primarily implemented in the `slash_commands.py` file.
+- Implementation of more sophisticated NLP techniques integrated with the graph knowledgebase
+- Enhanced multi-modal capabilities (image, audio processing) with knowledge graph integration
+- Improved long-term learning capabilities using the graph structure
+- Implementation of reasoning algorithms leveraging the graph knowledgebase
+- Integration with external knowledge bases and ontologies
+- Development of visualization tools for the graph knowledgebase
 
-## 14. 🛠️ Customization Points
+## 11. 📊 Performance Considerations
 
-- 🎭 **Personality**: Tweak `config.py` to adjust your AI's persona
-- 🧠 **AI Model**: Modify `ollama_client.py` to use different AI backends
-- 🌈 **Appearance**: Customize `banner.py` for a unique look
-- 🔍 **Search Engine**: Extend `ddg_search.py` to add more search providers
-- 🤖 **Assistant Commands**: Add new commands in `slash_commands.py`
-- 🎙️ **Voice Interaction**: Customize wake words and voice settings in `voice_assist.py`
+- Optimization of graph traversal algorithms for large-scale knowledge bases
+- Caching mechanisms for frequently accessed knowledge
+- Asynchronous updates to the graph knowledgebase to maintain responsiveness
+- Scalability planning for growing knowledge bases
 
-## 15. 🚀 Scaling Up
+## 12. 🔄 Continuous Learning
 
-As your AI assistant grows, consider:
+- Mechanisms for the AI to autonomously update its graph knowledgebase
+- Integration of user feedback to refine and correct knowledge
+- Periodic review and pruning of outdated or low-confidence information in the graph
 
-1. 📊 Database integration for long-term memory
-2. 🌐 API endpoints for web/mobile interfaces
-3. 🧠 Multiple AI models for specialized tasks
-4. 🔒 Enhanced security features
-5. 🔧 Performance optimizations for large-scale deployments
-6. 🌍 Multilingual support for voice and text interactions
+## 13. 🌐 Interoperability
 
-## 16. 🎉 Conclusion
+- APIs for external systems to query and update the graph knowledgebase
+- Export and import functionality for the knowledge graph
+- Integration capabilities with other AI systems and knowledge repositories
 
-Ollama_Agents is designed to be both powerful and flexible. Each module plays a crucial role, and together they create an AI assistant that's greater than the sum of its parts. The modular architecture allows for easy customization and extension, making it adaptable to a wide range of use cases and requirements.
+## 14. 📈 Monitoring and Analytics
 
-Remember to keep your tests up-to-date as you add new features or modify existing ones. This will ensure the continued reliability and maintainability of your AI assistant.
+- Tools for visualizing the growth and evolution of the knowledge graph
+- Analytics on knowledge utilization and gaps
+- Performance metrics for response generation and knowledge retrieval
 
-Happy building! 🏗️✨
+## 15. 🔒 Ethical Considerations
+
+- Mechanisms to ensure fairness and reduce bias in the knowledge representation
+- Transparency in knowledge sourcing and credibility assessment
+- User privacy protections in knowledge storage and utilization
+
+## 16. 🎓 Conclusion
+
+The Ollama_Agents architecture, centered around its innovative JSON-based graph knowledgebase, represents a significant advancement in AI assistant design. By combining flexible knowledge representation, modular components, and advanced features like dynamic learning and multi-agent capabilities, it provides a robust foundation for creating sophisticated, context-aware, and continually evolving AI systems.
+
+This architecture not only enhances the current capabilities of AI assistants but also paves the way for future innovations in artificial intelligence and knowledge management. As the system evolves, it will continue to push the boundaries of what's possible in AI-human interaction and knowledge representation.

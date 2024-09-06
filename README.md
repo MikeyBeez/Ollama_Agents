@@ -1,33 +1,48 @@
-# 🤖 Ollama_Agents: Your Personal AI Assistant Builder 🚀
+# 🤖 Ollama_Agents: Your Advanced AI Assistant Builder with Graph Knowledgebase 🚀
 
-Welcome to Ollama_Agents! This repository allows you to create spectacular AI agents using Ollama. It's like having a LEGO set for AI - mix, match, and build your dream assistants! 🧱✨
+Welcome to Ollama_Agents! This repository allows you to create sophisticated AI agents using Ollama, featuring a unique graph-based knowledgebase. It's like having a high-tech AI laboratory with a built-in brain! 🧠✨
 
 ## 🌟 What's New?
 
-- 🎭 Multi-agent system: Interact with multiple AI personalities
-- 🔀 Easy agent selection from the main menu
-- 🎨 Colorful command-line interface
-- 🧠 Enhanced memory management
-- 🔍 Integrated DuckDuckGo search capabilities
-- 🛠️ Improved modular design for easy customization
-- 🔎 Memory search commands: `/ms` and `/msl`
-- 🧵 New `/fabric` command for using Fabric patterns
-- 📂 Refactored command structure for better organization
-- 🧪 Comprehensive test suite added
-- 🤖 New `/assistant` command for various helpful functions
+- 🕸️ Graph-based Knowledgebase: A novel approach using JSON for flexible, relational knowledge storage
+- 🧠 Enhanced Debug Agent with detailed cognitive processing visualization
+- 🌳 Dynamic Knowledge Tree generation and management
+- 🔍 Improved memory search and context management
+- 🧐 Fact-checking and source credibility assessment
+- 🎭 Multi-agent system with easy switching between agents
+- 🔀 Interactive follow-up question handling
+- 🎨 Rich, colorful command-line interface with progress tracking
+- 🛠️ Modular design with improved error handling and logging
 
 ## 🚀 Key Features
 
-1. 📚 Modular Architecture: Each function is in a separate module, making it easy to add, remove, or modify features.
-2. 💬 Interactive CLI: Built with `prompt_toolkit` for a sci-fi movie-worthy experience!
-3. 🔐 Secure Configuration: Customize your AI's personality in `config.py`.
-4. 🧪 Comprehensive Testing: Because quality is our superpower!
-5. 🌐 Web Search Integration: Your AI can now search the web using DuckDuckGo.
-6. 📜 Chat History: Never forget a conversation with built-in history management.
-7. 🧠 Memory Search: Quickly retrieve and utilize relevant information from past interactions and uploaded documents.
-8. 🧵 Fabric Integration: Use Fabric patterns for enhanced AI interactions.
-9. 🎭 Multi-Agent System: Interact with multiple AI personalities in one session.
-10. 🤖 Assistant Command: Perform various tasks with a simple `/assistant` command.
+1. 📊 Graph Knowledgebase: Utilizes a JSON-based graph structure for flexible and relational knowledge representation
+2. 📚 Modular Architecture: Each function is in a separate module for easy customization and extension
+3. 💬 Interactive CLI: Built with `rich` for a cinematic experience!
+4. 🔐 Secure Configuration: Customize your AI's personality and behavior in `config.py`
+5. 🧪 Comprehensive Testing: Because quality is our superpower!
+6. 🌐 Web Search Integration: Your AI can search the web using DuckDuckGo
+7. 📜 Advanced Chat History: Never forget a conversation with built-in history management and analysis
+8. 🧠 Sophisticated Memory Search: Quickly retrieve and utilize relevant information from past interactions and uploaded documents
+9. 🧵 Fabric Integration: Use Fabric patterns for enhanced AI interactions
+10. 🎭 Multi-Agent System: Interact with multiple AI personalities in one session
+11. 🤖 Debug Mode: Visualize the agent's thought process and decision-making in real-time
+12. 🌳 Knowledge Tree: Dynamic generation and visualization of knowledge structures
+13. 🧐 Fact-Checking: Verify information and assess source credibility
+14. 👤 User Profiling: Adapt responses based on user expertise and interests
+
+## 💡 Why JSON-based Graph Knowledgebase?
+
+Our unique approach of using a JSON-based graph structure for the knowledgebase offers several advantages:
+
+1. 🔄 Flexibility: Easily adapt and evolve the knowledge structure as your AI learns
+2. 🔗 Rich Relationships: Capture complex relationships between concepts more intuitively than in traditional vector databases
+3. 🚀 Performance: Efficient querying and updating of interconnected information
+4. 🧩 Simplicity: No need for complex vector database setups or maintenance
+5. 📦 Portability: JSON format allows for easy data transfer and backup
+6. 🔍 Interpretability: Graph structure provides clear visibility into the AI's knowledge connections
+
+This approach allows Ollama_Agents to have a more nuanced and context-aware understanding, leading to more intelligent and adaptive responses.
 
 ## 🛠️ Getting Started
 
@@ -84,14 +99,6 @@ Run the main script:
 python -m src.main
 ```
 
-## 🧪 Running Tests
-
-Ensure your AI is in top shape:
-
-```bash
-python -m unittest discover src/tests
-```
-
 ## 📘 Module Documentation
 
 Detailed documentation for each module can be found in the `docs/` directory:
@@ -112,6 +119,30 @@ Detailed documentation for each module can be found in the `docs/` directory:
 - [Logging Guide](docs/logging_guide.md)
 - [Building Agents](docs/building_agents.md)
 - [Assistant User Guide](docs/assistant_user_guide.md)
+
+## 🧠 Debug Agent Commands
+
+- `/help`: Show available commands
+- `/search <query>`: Perform an interactive web search
+- `/context`: Show current context
+- `/clear_context`: Clear the current context and bullet points
+- `/bullets`: Display current bullet points
+- `/knowledge_tree`: Display the knowledge tree
+- `/explain <concept>`: Get an explanation of a concept
+- `/fact_check <statement>`: Perform a fact check on a statement
+- `/profile`: Display your user profile
+- `/graph`: Visualize the current state of the graph knowledgebase
+
+## 🕸️ Graph Knowledgebase
+
+Our graph knowledgebase is implemented in `src/modules/kb_graph.py`. It uses a JSON structure to represent nodes and edges, allowing for flexible and powerful knowledge representation. Key features include:
+
+- 📊 Efficient storage of relationships between concepts
+- 🔍 Fast querying of related information
+- 🧠 Dynamic updating of knowledge as the AI learns
+- 🌐 Easy integration with web search results and user interactions
+
+To interact with the graph knowledgebase, use the `/graph` command in the debug agent.
 
 ## 🔍 Memory Search Commands
 
@@ -155,4 +186,4 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ---
 
-Built with ❤️ and ☕ by the Ollama_Agents team. Let's make AI magic happen! ✨
+Built with ❤️ and 🧠 by the Ollama_Agents team. Let's revolutionize AI knowledge representation! 🚀
