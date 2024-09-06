@@ -1,3 +1,5 @@
+# src/modules/ollama_client.py
+
 import requests
 import json
 from rich.console import Console
@@ -50,7 +52,10 @@ class OllamaClient:
 default_client = OllamaClient()
 
 def process_prompt(prompt: str, model: str, username: str):
-    logger.info(f"Processing prompt: prompt='{prompt[:50]}...', model={model}, username={username}")
     return default_client.process_prompt(prompt, model, username)
 
-__all__ = ['process_prompt']
+# Add this line to create an alias for process_prompt
+generate_response = process_prompt
+
+# Ensure all necessary functions are available for import
+__all__ = ['OllamaClient', 'process_prompt', 'generate_response']
