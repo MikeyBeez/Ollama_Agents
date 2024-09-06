@@ -1,17 +1,89 @@
 # src/modules/agent_tools.py
 
 import json
-from typing import Dict, Any, List
+from typing import List, Dict, Any, Callable
 from src.modules.ollama_client import process_prompt
 from src.modules.logging_setup import logger
-from src.modules.memory_search import search_memories
-from src.modules.save_history import chat_history
-from src.modules.ddg_search import DDGSearch
-from src.modules.input import get_user_input
+from rich.console import Console
+from rich.panel import Panel
 
-ddg_search = DDGSearch()
+console = Console()
 
-def analyze_input(user_input: str, model_name: str) -> Dict[str, Any]:
+def update_bullet_points(response: str, model_name: str) -> List[str]:
+    """
+    Extract key points from a given response.
+
+    Args:
+    response (str): The text to extract bullet points from.
+    model_name (str): The name of the model to use for extraction.
+
+    Returns:
+    List[str]: A list of extracted bullet points.
+    """
+    logger.info("Extracting bullet points from response")
+    bullet_prompt = f"Extract 3-5 key points from this text as a bullet point list: {response}"
+    bullets = process_prompt(bullet_prompt, model_name, "BulletPointExtractor")
+    return [b.strip() for b in bullets.split('\n') if b.strip()]
+
+def rank_bullet_points(bullet_points: List[str], model_name: str, max_points: int = 15) -> List[str]:
+    """
+    Rank and trim a list of bullet points.
+
+    Args:
+    bullet_points (List[str]): The list of bullet points to rank.
+    model_name (str): The name of the model to use for ranking.
+    max_points (int): The maximum number of points to keep after ranking.
+
+    Returns:
+    List[str]: A ranked and trimmed list of bullet points.
+    """
+    logger.info(f"Ranking bullet points, keeping top {max_points}")
+    if len(bullet_points) > max_points:
+        rank_prompt = "Rank the following bullet points by importance and relevance:\n" + "\n".join(bullet_points)
+        ranked = process_prompt(rank_prompt, model_name, "BulletPointRanker")
+        return [b.strip() for b in ranked.split('\n') if b.strip()][:max_points]
+    return bullet_points
+
+def generate_response(user_input: str, context: str, model_name: str) -> str:
+    """
+    Generate a response based on user input and context.
+
+    Args:
+    user_input (str): The user's query or input.
+    context (str): The context for the response.
+    model_name (str): The name of the model to use for response generation.
+
+    Returns:
+    str: The generated response.
+    """
+    logger.info("Generating response based on user input and context")
+    response_prompt = f"""Given the user query: "{user_input}"
+    And this context: {context}
+
+    Generate a helpful and informative response that:
+    1. Directly addresses the user's query and intention
+    2. Incorporates relevant research findings
+    3. Provides clear explanations or instructions as needed
+    4. Acknowledges any limitations or uncertainties in the information
+    5. Suggests areas for further research if applicable
+
+    Ensure the response is accurate, ethical, and helpful.
+    Limit your response to 200 words.
+    """
+    return process_prompt(response_prompt, model_name, "ResponseGenerator")
+
+def analyze_user_input(user_input: str, model_name: str) -> Dict[str, Any]:
+    """
+    Analyze the user's input to determine its characteristics.
+
+    Args:
+    user_input (str): The user's query or input.
+    model_name (str): The name of the model to use for analysis.
+
+    Returns:
+    Dict[str, Any]: A dictionary containing analysis results.
+    """
+    logger.info("Analyzing user input")
     analysis_prompt = f"""Analyze the following user input:
     "{user_input}"
     Provide your response in the following JSON format:
@@ -23,8 +95,7 @@ def analyze_input(user_input: str, model_name: str) -> Dict[str, Any]:
         "requires_research": true or false
     }}
     """
-
-    analysis_result = process_prompt(analysis_prompt, model_name, "Analyzer")
+    analysis_result = process_prompt(analysis_prompt, model_name, "InputAnalyzer")
     try:
         return json.loads(analysis_result)
     except json.JSONDecodeError:
@@ -37,121 +108,43 @@ def analyze_input(user_input: str, model_name: str) -> Dict[str, Any]:
             "requires_research": True
         }
 
-def gather_context(user_input: str, analysis: Dict[str, Any], context: str, agent_name: str) -> str:
-    if analysis.get('requires_research', False):
-        memories = search_memories(user_input, top_k=3, similarity_threshold=0.7)
-        memory_context = "\n".join([f"Memory: {m['content']}" for m in memories])
-        context += f"\nRelevant memories:\n{memory_context}"
+def interactive_followup(context: str, model_name: str, process_func: Callable[[str], str]) -> str:
+    """
+    Generate follow-up questions and handle user interaction for further exploration.
 
-    if analysis.get('requires_research', False):
-        search_query = refine_search_query(user_input, analysis)
-        search_results = ddg_search.run_search(search_query)
-        filtered_results = filter_search_results(user_input, search_results)
-        context += f"\nWeb search results:\n{filtered_results}"
+    Args:
+    context (str): The current context of the conversation.
+    model_name (str): The name of the model to use for generating questions.
+    process_func (Callable[[str], str]): A function to process user input (usually the agent's main process_input function).
 
-    recent_history = chat_history.get_history()[-3:]
-    history_context = "\n".join([f"User: {h['prompt']}\n{agent_name}: {h['response']}" for h in recent_history])
-    context += f"\nRecent conversation:\n{history_context}"
+    Returns:
+    str: The response to the chosen follow-up question or user input.
+    """
+    logger.info("Generating follow-up questions and handling user interaction")
 
-    return context
+    # Generate follow-up questions
+    question_prompt = f"Based on the following context, generate 3 relevant follow-up questions:\n\n{context}"
+    questions = process_prompt(question_prompt, model_name, "QuestionGenerator").split('\n')
 
-def generate_response(user_input: str, context: str, analysis: Dict[str, Any], agent_name: str, model_name: str) -> str:
-    response_prompt = f"""As {agent_name}, respond to the user's input:
-    "{user_input}"
-
-    Consider this context:
-    {context}
-
-    And this analysis:
-    {json.dumps(analysis)}
-
-    Generate a comprehensive and informative response that:
-    1. Directly addresses the user's query
-    2. Incorporates relevant research findings
-    3. Provides clear explanations and examples
-    4. Offers practical advice or next steps
-    5. Acknowledges any limitations or uncertainties
-
-    If you need more information to provide a complete answer, ask a clarifying question instead of giving a full response:"""
-
-    return process_prompt(response_prompt, model_name, "ResponseGenerator")
-
-def needs_clarification(response: str) -> bool:
-    return '?' in response and len(response.split()) < 20
-
-def refine_response(user_input: str, initial_response: str, context: str, model_name: str) -> str:
-    refine_prompt = f"""Given the user's input: "{user_input}"
-    And the initial response: "{initial_response}"
-    And this context: {context}
-
-    Refine the response to ensure it is:
-    1. Comprehensive and informative
-    2. Directly addressing the user's input
-    3. Factually accurate and up-to-date
-    4. Coherent and well-structured
-    5. Empathetic and appropriate in tone
-    6. Not repetitive
-
-    Provide only the refined response, without repeating the original input or initial response:"""
-
-    return process_prompt(refine_prompt, model_name, "ResponseRefiner")
-
-def refine_search_query(user_input: str, analysis: Dict[str, Any]) -> str:
-    refine_prompt = f"""Given the user query: '{user_input}'
-    and this analysis: {json.dumps(analysis)}
-    Generate a concise and specific web search query to find relevant information.
-    Query:"""
-
-    return process_prompt(refine_prompt, "DEFAULT_MODEL", "QueryRefiner")
-
-def filter_search_results(query: str, results: List[str]) -> str:
-    result_text = "\n".join(results[:5])
-    filter_prompt = f"""Given the query: '{query}' and these search results:
-    {result_text}
-
-    Provide a concise summary of the most relevant information:"""
-
-    return process_prompt(filter_prompt, "DEFAULT_MODEL", "ResultFilter")
-
-def evaluate_step(content: str, step_name: str, model_name: str) -> str:
-    critique_prompt = f"""As a critic, evaluate the following {step_name}:
-    {content}
-
-    Provide a critique highlighting strengths, weaknesses, and areas for improvement:"""
-
-    critique = process_prompt(critique_prompt, model_name, "Critic")
-
-    contrary_prompt = f"""As a devil's advocate, provide a contrary perspective to the following {step_name}:
-    {content}
-
-    Offer alternative viewpoints or potential issues that may have been overlooked:"""
-
-    contrary_view = process_prompt(contrary_prompt, model_name, "DevilsAdvocate")
-
-    judge_prompt = f"""As an impartial judge, evaluate the original {step_name}, the critique, and the contrary perspective:
-
-    Original:
-    {content}
-
-    Critique:
-    {critique}
-
-    Contrary Perspective:
-    {contrary_view}
-
-    Provide a balanced judgment, highlighting what to keep, what to discard, and any necessary adjustments:"""
-
-    judgment = process_prompt(judge_prompt, model_name, "Judge")
-
-    logger.info(f"Evaluation of {step_name}:")
-    logger.info(f"Critique: {critique}")
-    logger.info(f"Contrary perspective: {contrary_view}")
-    logger.info(f"Judgment: {judgment}")
-
-    return judgment
-
-def request_user_clarification(questions: List[str]) -> str:
-    print("I need some clarification to better assist you:")
+    # Display questions to the user
+    console.print(Panel("📚 Based on our conversation, here are some follow-up questions you might find interesting:", border_style="cyan"))
     for i, question in enumerate(questions, 1):
-        print(f"{i}. {question}")
-    return get_user_input("Please provide additional information: ")
+        console.print(f"  {i}. {question.strip()}")
+    console.print("You can choose a number, ask your own question, or press Enter to skip.")
+
+    # Get user input
+    user_choice = console.input("Your choice (number, question, or Enter to skip): ")
+
+    if user_choice.strip() == "":
+        return "No follow-up question selected."
+
+    if user_choice.isdigit() and 1 <= int(user_choice) <= len(questions):
+        chosen_question = questions[int(user_choice) - 1].strip()
+    else:
+        chosen_question = user_choice
+
+    # Process the chosen or entered question
+    console.print(Panel(f"Processing follow-up: {chosen_question}", border_style="yellow"))
+    followup_response = process_func(chosen_question)
+
+    return f"Follow-up: {chosen_question}\n\nResponse: {followup_response}"

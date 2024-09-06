@@ -1,33 +1,14 @@
 # src/modules/context_management.py
 
-from typing import List, Dict, Any, Sequence
-from rich.console import Console
-from src.modules.logging_setup import logger
+from typing import List, Tuple, Dict, Any
 from src.modules.memory_search import search_memories
-from src.modules.save_history import chat_history
-from src.modules.ddg_search import DDGSearch
-from src.modules.errors import DataProcessingError, ModelInferenceError
+from src.modules.logging_setup import logger
+from src.modules.errors import DataProcessingError
 from src.modules.ollama_client import process_prompt
-from config import DEFAULT_MODEL
-
-console = Console()
-ddg_search = DDGSearch()
-
-def print_separator(console):
-    console.print("\n" + "-" * 50 + "\n")
-
-def announce_step(message: str):
-    print_separator(console)
-    console.print(f"[bold blue]{message}[/bold blue]")
 
 class BulletPointManager:
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(BulletPointManager, cls).__new__(cls)
-            cls._instance.bullet_points = []
-        return cls._instance
+    def __init__(self):
+        self.bullet_points = []
 
     def add_bullet_point(self, bullet_point: str):
         if bullet_point not in self.bullet_points:
@@ -36,71 +17,148 @@ class BulletPointManager:
 
     def _rank_and_trim(self):
         if len(self.bullet_points) > 15:
-            ranked_points = rank_bullet_points(self.bullet_points)
-            self.bullet_points = ranked_points[:15]
+            self.bullet_points = rank_bullet_points(self.bullet_points)[:15]
 
     def get_bullet_points(self) -> List[str]:
         return self.bullet_points
 
 bullet_manager = BulletPointManager()
 
-def gather_context(user_input: str, topic: str, current_context: str, agent_name: str) -> str:
+def gather_context(user_input: str, topic: str, conversation_history: List[Tuple[str, str]], bullet_points: List[str], agent_name: str) -> str:
+    """
+    Gather context from various sources for a given user input.
+
+    Args:
+    user_input (str): The user's input query.
+    topic (str): The main topic of the query.
+    conversation_history (List[Tuple[str, str]]): Recent conversation history.
+    bullet_points (List[str]): Current bullet points.
+    agent_name (str): Name of the agent gathering context.
+
+    Returns:
+    str: A string containing the gathered context.
+    """
     try:
+        logger.info(f"Gathering context for topic: {topic}")
+
+        # Retrieve relevant memories
         memories = search_memories(user_input, top_k=3, similarity_threshold=0.7)
-        memory_context = "\n".join([f"Memory: {m['content']}" for m in memories])
+        memory_context = "\n".join([f"💾 Related info: {m['content']}" for m in memories])
 
-        search_query = f"{topic} {user_input}"
-        search_results = ddg_search.run_search(search_query)
-        search_context = "\n".join(search_results[:3])
+        # Get recent conversation history
+        recent_history = conversation_history[-3:]
+        history_context = "\n".join([f"👤 User: {h[0]}\n🤖 {agent_name}: {h[1]}" for h in recent_history])
 
-        recent_history = chat_history.get_history()[-3:]
-        history_context = "\n".join([f"User: {h['prompt']}\n{agent_name}: {h['response']}" for h in recent_history])
+        # Format bullet points
+        bullet_context = "\n".join([f"📌 {point}" for point in bullet_points])
 
-        new_context = f"{current_context}\n\nRelevant memories:\n{memory_context}\n\nWeb search results:\n{search_context}\n\nRecent conversation:\n{history_context}"
-        return new_context
+        # Combine all context
+        full_context = f"🏷️ Topic: {topic}\n\n📚 Relevant information:\n{memory_context}\n\n💬 Recent conversation:\n{history_context}\n\n🔑 Key points:\n{bullet_context}"
+
+        logger.info("Context gathering completed successfully")
+        return full_context
     except Exception as e:
-        raise DataProcessingError(f"Error gathering context: {str(e)}")
+        logger.error(f"Error gathering context: {str(e)}")
+        raise DataProcessingError(f"Failed to gather context: {str(e)}")
 
-def build_context(model_name: str = DEFAULT_MODEL) -> str:
+def rank_bullet_points(bullet_points: List[str], model_name: str = "default") -> List[str]:
+    """
+    Rank a list of bullet points by importance and relevance.
+
+    Args:
+    bullet_points (List[str]): List of bullet points to rank.
+    model_name (str): Name of the model to use for ranking.
+
+    Returns:
+    List[str]: Ranked list of bullet points.
+    """
     try:
-        announce_step("Building Context")
-        bullet_points = bullet_manager.get_bullet_points()
-        ranked_points = rank_bullet_points(bullet_points)
-
-        context = []
-        for point in ranked_points[:5]:  # Use top 5 bullet points
-            response = query_response("elaborate on bullet point", point, model_name)
-            context.append(response)
-
-        return "\n".join(context)
+        logger.info("Ranking bullet points")
+        ranking_prompt = "Rank the following bullet points by importance and relevance:\n" + "\n".join(bullet_points)
+        ranked = process_prompt(ranking_prompt, model_name, "BulletPointRanker")
+        return [b.strip() for b in ranked.split('\n') if b.strip()]
     except Exception as e:
-        raise DataProcessingError(f"Error building context: {str(e)}")
+        logger.error(f"Error ranking bullet points: {str(e)}")
+        return bullet_points  # Return original list if ranking fails
 
-def rank_bullet_points(bullet_points: List[str], model_name: str = DEFAULT_MODEL) -> Sequence[str]:
+def summarize_context(context: str, model_name: str) -> str:
+    """
+    Summarize the given context.
+
+    Args:
+    context (str): The context to summarize.
+    model_name (str): Name of the model to use for summarization.
+
+    Returns:
+    str: A summary of the context.
+    """
     try:
-        announce_step("Ranking Bullet Points")
-        ranking_prompt = "Rank the following bullet points by relevance and importance:\n" + "\n".join(bullet_points)
-        ranked_points = process_prompt(ranking_prompt, model_name, "BulletPointRanker").split("\n")
-        console.print("[bold cyan]Ranked Bullet Points:[/bold cyan]")
-        for i, point in enumerate(ranked_points, 1):
-            console.print(f"{i}. {point}")
-        return ranked_points
+        logger.info("Summarizing context")
+        summary_prompt = f"Summarize the following context in a concise manner:\n\n{context}"
+        return process_prompt(summary_prompt, model_name, "ContextSummarizer")
     except Exception as e:
-        raise DataProcessingError(f"Error ranking bullet points: {str(e)}")
+        logger.error(f"Error summarizing context: {str(e)}")
+        return "Failed to summarize context due to an error."
 
-def query_response(query_type: str, context: str, model_name: str = DEFAULT_MODEL) -> str:
+def extract_key_information(context: str, model_name: str) -> Dict[str, Any]:
+    """
+    Extract key information from the given context.
+
+    Args:
+    context (str): The context to extract information from.
+    model_name (str): Name of the model to use for extraction.
+
+    Returns:
+    Dict[str, Any]: A dictionary containing extracted key information.
+    """
     try:
-        announce_step(f"Generating {query_type.capitalize()} Query")
-        query = process_prompt(f"Generate a {query_type} based on this context: {context}", model_name, "QueryGenerator")
-        console.print(f"[bold cyan]{query_type.capitalize()} Query:[/bold cyan] {query}")
+        logger.info("Extracting key information from context")
+        extraction_prompt = f"""Extract key information from the following context:
+        {context}
 
-        announce_step(f"Processing {query_type.capitalize()} Query")
-        response = process_prompt(query, model_name, "QueryResponder")
-        console.print(f"[bold cyan]Response:[/bold cyan] {response}")
-
-        if query_type == "bullet point":
-            bullet_manager.add_bullet_point(response)
-
-        return response
+        Provide the extracted information in the following JSON format:
+        {{
+            "main_topic": "The main topic of the context",
+            "key_points": ["Point 1", "Point 2", "Point 3"],
+            "entities": ["Entity 1", "Entity 2"],
+            "time_references": ["Time reference 1", "Time reference 2"],
+            "open_questions": ["Question 1", "Question 2"]
+        }}
+        """
+        extracted_info = process_prompt(extraction_prompt, model_name, "InfoExtractor")
+        return json.loads(extracted_info)
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing extracted information: {str(e)}")
+        return {"error": "Failed to parse extracted information"}
     except Exception as e:
-        raise ModelInferenceError(f"Error in query response for {query_type}: {str(e)}")
+        logger.error(f"Error extracting key information: {str(e)}")
+        return {"error": "Failed to extract key information"}
+
+def update_context(current_context: str, new_information: str, model_name: str) -> str:
+    """
+    Update the current context with new information.
+
+    Args:
+    current_context (str): The current context.
+    new_information (str): New information to be incorporated.
+    model_name (str): Name of the model to use for context updating.
+
+    Returns:
+    str: Updated context.
+    """
+    try:
+        logger.info("Updating context with new information")
+        update_prompt = f"""Update the following context with the new information:
+
+        Current Context:
+        {current_context}
+
+        New Information:
+        {new_information}
+
+        Provide an updated context that incorporates the new information coherently.
+        """
+        return process_prompt(update_prompt, model_name, "ContextUpdater")
+    except Exception as e:
+        logger.error(f"Error updating context: {str(e)}")
+        return current_context  # Return original context if update fails
