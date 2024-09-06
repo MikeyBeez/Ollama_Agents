@@ -1,7 +1,7 @@
 # src/modules/agent_tools.py
 
 import json
-from typing import List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable, Tuple
 from src.modules.ollama_client import process_prompt
 from src.modules.logging_setup import logger
 from rich.console import Console
@@ -225,3 +225,93 @@ def fact_check(statement: str, model_name: str) -> Dict[str, Any]:
             "explanation": "Unable to perform fact-check due to an error.",
             "sources": []
         }
+
+def find_analogies(current_problem: str, knowledge_base: str, model_name: str) -> List[Dict[str, str]]:
+    """
+    Find analogies between the current problem and situations in the knowledge base.
+    """
+    logger.info(f"Finding analogies for problem: {current_problem[:50]}...")
+    analogy_prompt = f"""Given the current problem:
+    "{current_problem}"
+
+    And the following knowledge base:
+    {knowledge_base}
+
+    Find 3 analogous situations or concepts from the knowledge base that could help in understanding or solving the current problem.
+    For each analogy, explain how it relates to the current problem and how it might be useful.
+
+    Provide your response in the following JSON format:
+    [
+        {{
+            "analogy": "Description of the analogous situation",
+            "relation": "Explanation of how it relates to the current problem",
+            "potential_use": "How this analogy might be useful in addressing the current problem"
+        }},
+        ...
+    ]
+    """
+    analogy_result = process_prompt(analogy_prompt, model_name, "AnalogyFinder")
+    try:
+        return json.loads(analogy_result)
+    except json.JSONDecodeError:
+        logger.error(f"Failed to parse JSON: {analogy_result}")
+        return []
+
+def detect_contradictions(information_set: List[str], model_name: str) -> List[Dict[str, Any]]:
+    """
+    Detect contradictions within a set of information.
+    """
+    logger.info("Detecting contradictions in information set")
+    contradiction_prompt = f"""Analyze the following set of information for any contradictions:
+    {json.dumps(information_set)}
+
+    Identify any statements that contradict each other. For each contradiction found, provide the conflicting statements and an explanation of the contradiction.
+
+    Provide your response in the following JSON format:
+    [
+        {{
+            "statement1": "First conflicting statement",
+            "statement2": "Second conflicting statement",
+            "explanation": "Explanation of why these statements contradict each other"
+        }},
+        ...
+    ]
+    """
+    contradiction_result = process_prompt(contradiction_prompt, model_name, "ContradictionDetector")
+    try:
+        return json.loads(contradiction_result)
+    except json.JSONDecodeError:
+        logger.error(f"Failed to parse JSON: {contradiction_result}")
+        return []
+
+def resolve_contradictions(contradictions: List[Dict[str, Any]], model_name: str) -> List[Dict[str, Any]]:
+    """
+    Attempt to resolve detected contradictions.
+    """
+    logger.info("Resolving contradictions")
+    resolution_prompt = f"""Given the following contradictions:
+    {json.dumps(contradictions)}
+
+    For each contradiction, provide a possible resolution or explanation that might reconcile the conflicting information.
+    If a resolution is not possible, explain why and suggest how to proceed given the contradictory information.
+
+    Provide your response in the following JSON format:
+    [
+        {{
+            "contradiction": {{
+                "statement1": "First conflicting statement",
+                "statement2": "Second conflicting statement"
+            }},
+            "resolution": "Proposed resolution or explanation to reconcile the contradiction",
+            "confidence": 0.0 to 1.0,
+            "next_steps": "Suggested actions or further research if needed"
+        }},
+        ...
+    ]
+    """
+    resolution_result = process_prompt(resolution_prompt, model_name, "ContradictionResolver")
+    try:
+        return json.loads(resolution_result)
+    except json.JSONDecodeError:
+        logger.error(f"Failed to parse JSON: {resolution_result}")
+        return []

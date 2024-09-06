@@ -31,6 +31,8 @@ from src.modules.kb_graph import update_knowledge_graph, get_related_nodes
 from src.modules.causal_reasoning import infer_causal_relationships, analyze_causal_chain
 from src.modules.hypothesis_testing import generate_hypotheses, design_experiment
 from src.modules.ollama_client import generate_response
+from src.modules.save_history import chat_history
+from src.modules.agent_tools import find_analogies, detect_contradictions, resolve_contradictions
 from config import DEFAULT_MODEL, AGENT_NAME, USER_NAME
 
 console = Console()
@@ -50,6 +52,13 @@ def debug_panel(func):
         finally:
             console.print(Panel(f"Exiting: {func_name}", border_style="yellow"))
     return wrapper
+
+def parse_json_safely(json_string: str) -> Any:
+    try:
+        return json.loads(json_string)
+    except json.JSONDecodeError:
+        logger.error(f"Failed to parse JSON: {json_string}")
+        return None
 
 class DebugAgent:
     def __init__(self, model_name=DEFAULT_MODEL):
@@ -105,6 +114,7 @@ class DebugAgent:
     @debug_panel
     def _clear_history_prompt(self):
         if Confirm.ask("Do you want to clear the chat history?"):
+            chat_history.clear()
             self.conversation_history.clear()
             self.bullet_points.clear()
             self.knowledge_graph.clear()
@@ -188,10 +198,16 @@ class DebugAgent:
 
         hypotheses = self._generate_and_test_hypotheses(context)
 
-        plan = self._create_and_analyze_plan(user_input, context, knowledge, causal_relationships, hypotheses)
+        analogies = self._find_analogies(user_input, context)
+        console.print(Panel(f"Found Analogies: {json.dumps(analogies, indent=2)}", border_style="cyan"))
+
+        contradictions = self._detect_and_resolve_contradictions(knowledge)
+        console.print(Panel(f"Detected and Resolved Contradictions: {json.dumps(contradictions, indent=2)}", border_style="cyan"))
+
+        plan = self._create_and_analyze_plan(user_input, context, knowledge, causal_relationships, hypotheses, analogies, contradictions)
         console.print(Panel(f"Analyzed Plan:\n{plan}", border_style="cyan"))
 
-        response = self._generate_response_from_plan(plan, user_input, context, knowledge, causal_relationships, hypotheses)
+        response = self._generate_response_from_plan(plan, user_input, context, knowledge, causal_relationships, hypotheses, analogies, contradictions)
 
         self._assess_progress(response, plan)
 
@@ -244,10 +260,9 @@ class DebugAgent:
             search_queries = self._generate_search_queries(refined_query)
             all_results = []
 
-            queries_json = json.dumps({"queries": search_queries[:5]})
-            console.print(f"Generated search queries: {queries_json}")
+            console.print(f"Generated search queries: {json.dumps(search_queries)}")
 
-            for query in json.loads(queries_json)["queries"]:
+            for query in search_queries:
                 console.print(f"Executing search query: {query}")
                 results = self._perform_search(query)
                 console.print(f"Found {len(results)} results for '{query}'")
@@ -261,23 +276,18 @@ class DebugAgent:
 
     @debug_panel
     def _refine_query(self, context: str, analysis: Dict[str, Any]) -> str:
-        refine_prompt = f"Given the context: {context}\nAnd the analysis: {analysis}\nRefine the search query to focus on using AI agents to write and publish a book."
+        refine_prompt = f"Given the context: {context}\nAnd the analysis: {analysis}\nRefine the search query to focus on the most relevant aspects."
         return generate_response(refine_prompt, self.model_name, self.config['USER_NAME'])
 
     @debug_panel
     def _generate_search_queries(self, refined_query: str) -> List[str]:
         generate_prompt = f"""
         Generate 5 specific and focused search queries based on this refined query: {refined_query}
-        Focus on AI-assisted book writing, market research, and publishing.
         Provide your response as a JSON array of strings.
         """
         queries_json = generate_response(generate_prompt, self.model_name, self.config['USER_NAME'])
-        try:
-            queries = json.loads(queries_json)
-            return queries if isinstance(queries, list) else []
-        except json.JSONDecodeError:
-            logger.error(f"Failed to parse JSON from query generation: {queries_json}")
-            return []
+        queries = parse_json_safely(queries_json)
+        return queries if isinstance(queries, list) else []
 
     @debug_panel
     def _perform_search(self, query: str) -> List[Dict[str, Any]]:
@@ -286,13 +296,9 @@ class DebugAgent:
 
     @debug_panel
     def _filter_and_rank_results(self, results: List[Dict[str, Any]], context: str) -> List[Dict[str, Any]]:
-        filter_prompt = f"""Given these search results:\n{results}\nAnd this context:\n{context}\nRank and filter the results based on their relevance to using AI agents for book writing and publishing. Return only the top 3 most relevant results."""
+        filter_prompt = f"""Given these search results:\n{results}\nAnd this context:\n{context}\nRank and filter the results based on their relevance. Return only the top 3 most relevant results."""
         filtered_results = generate_response(filter_prompt, self.model_name, self.config['USER_NAME'])
-        try:
-            return json.loads(filtered_results)
-        except json.JSONDecodeError:
-            logger.error(f"Failed to parse JSON from filtered results: {filtered_results}")
-            return []
+        return parse_json_safely(filtered_results) or []
 
     @debug_panel
     def _perform_additional_search(self, query: str, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -331,22 +337,39 @@ class DebugAgent:
         return tested_hypotheses
 
     @debug_panel
+    def _find_analogies(self, problem: str, context: str) -> List[Dict[str, str]]:
+        console.print("Finding analogies...", style="bold blue")
+        analogies = find_analogies(problem, context, self.model_name)
+        return analogies
+
+    @debug_panel
+    def _detect_and_resolve_contradictions(self, information: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        console.print("Detecting and resolving contradictions...", style="bold blue")
+        information_set = [item['content'] for item in information]
+        contradictions = detect_contradictions(information_set, self.model_name)
+        resolutions = resolve_contradictions(contradictions, self.model_name)
+        return resolutions
+
+    @debug_panel
     def _create_and_analyze_plan(self, user_input: str, context: str, knowledge: List[Dict[str, Any]],
-                                 causal_relationships: List[Dict[str, Any]], hypotheses: List[Dict[str, Any]]) -> str:
+                                 causal_relationships: List[Dict[str, Any]], hypotheses: List[Dict[str, Any]],
+                                 analogies: List[Dict[str, str]], contradictions: List[Dict[str, Any]]) -> str:
         plan_prompt = f"""
         Based on the user input: "{user_input}"
-        And the following context, knowledge, causal relationships, and hypotheses:
+        And the following context, knowledge, causal relationships, hypotheses, analogies, and resolved contradictions:
         Context: {context}
         Knowledge: {json.dumps(knowledge)}
         Causal Relationships: {json.dumps(causal_relationships)}
         Hypotheses: {json.dumps(hypotheses)}
+        Analogies: {json.dumps(analogies)}
+        Resolved Contradictions: {json.dumps(contradictions)}
         Current Goal: {self.current_goal}
 
         1. Create a structured plan with main steps to address the user's query and achieve the current goal.
         2. For each main step, provide 2-3 sub-steps or considerations.
         3. Analyze the feasibility and potential challenges of each main step.
         4. Include a step to evaluate progress towards the goal.
-        5. Incorporate relevant causal relationships and hypotheses into the plan.
+        5. Incorporate relevant causal relationships, hypotheses, analogies, and resolved contradictions into the plan.
 
         Format your response as a JSON object with the following structure:
         {{
@@ -357,7 +380,9 @@ class DebugAgent:
                     "analysis": "Analysis of feasibility and challenges",
                     "progress_indicator": "How to measure progress for this step",
                     "relevant_causal_relationships": ["Relevant causal relationship 1", ...],
-                    "relevant_hypotheses": ["Relevant hypothesis 1", ...]
+                    "relevant_hypotheses": ["Relevant hypothesis 1", ...],
+                    "relevant_analogies": ["Relevant analogy 1", ...],
+                    "relevant_contradictions": ["Relevant resolved contradiction 1", ...]
                 }},
                 ...
             ],
@@ -365,37 +390,41 @@ class DebugAgent:
         }}
         """
         plan_response = generate_response(plan_prompt, self.model_name, self.config['USER_NAME'])
-        try:
-            plan_json = json.loads(plan_response)
+        plan_json = parse_json_safely(plan_response)
+        if plan_json:
             return json.dumps(plan_json, indent=2)
-        except json.JSONDecodeError:
-            logger.error(f"Failed to parse JSON from plan generation: {plan_response}")
+        else:
             return "Error: Unable to generate a structured plan."
 
     @debug_panel
     def _generate_response_from_plan(self, plan: str, user_input: str, context: str, knowledge: List[Dict[str, Any]],
-                                     causal_relationships: List[Dict[str, Any]], hypotheses: List[Dict[str, Any]]) -> str:
+                                     causal_relationships: List[Dict[str, Any]], hypotheses: List[Dict[str, Any]],
+                                     analogies: List[Dict[str, str]], contradictions: List[Dict[str, Any]]) -> str:
         response_prompt = f"""
         Based on the following plan:
         {plan}
 
         And considering the original user input: "{user_input}"
-        As well as the context, knowledge, causal relationships, and hypotheses:
+        As well as the context, knowledge, causal relationships, hypotheses, analogies, and resolved contradictions:
         Context: {context}
         Knowledge: {json.dumps(knowledge)}
         Causal Relationships: {json.dumps(causal_relationships)}
         Hypotheses: {json.dumps(hypotheses)}
+        Analogies: {json.dumps(analogies)}
+        Resolved Contradictions: {json.dumps(contradictions)}
         Current Goal: {self.current_goal}
 
         Generate a comprehensive response that:
         1. Addresses the user's query
         2. Follows the structure of the plan
-        3. Incorporates relevant information from the context, knowledge, causal relationships, and hypotheses
+        3. Incorporates relevant information from the context, knowledge, causal relationships, hypotheses, analogies, and resolved contradictions
         4. Highlights any important considerations or challenges
         5. Evaluates the current progress towards the goal
         6. Suggests the next immediate action to take
         7. Discusses relevant causal relationships and how they impact the plan
         8. Mentions relevant hypotheses and how they could be tested or incorporated into the plan
+        9. Utilizes relevant analogies to explain complex concepts or strategies
+        10. Addresses any resolved contradictions and explains their impact on the solution
 
         Ensure the response is clear, informative, and directly relevant to the user's needs and the current goal.
         """
@@ -420,11 +449,11 @@ class DebugAgent:
         }}
         """
         progress_response = generate_response(progress_prompt, self.model_name, self.config['USER_NAME'])
-        try:
-            progress_json = json.loads(progress_response)
+        progress_json = parse_json_safely(progress_response)
+        if progress_json:
             self.progress_status = progress_json
             console.print(Panel(f"Progress Assessment:\n{json.dumps(progress_json, indent=2)}", border_style="green"))
-        except json.JSONDecodeError:
+        else:
             logger.error(f"Failed to parse JSON from progress assessment: {progress_response}")
 
     @debug_panel
