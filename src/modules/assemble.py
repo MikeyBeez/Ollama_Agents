@@ -1,12 +1,12 @@
 # src/modules/assemble.py
 
-import json
-from typing import List, Tuple
-from pathlib import Path
+from typing import List, Tuple, Dict, Any
 from config import MEMORY_LENGTH
 from src.modules.chunk_history import assemble_chunks
 from src.modules.save_history import get_chat_history
 from src.modules.logging_setup import logger
+from src.modules.memory_search import search_memories
+from src.modules.kb_graph import get_related_nodes
 
 def assemble_prompt_with_history(current_prompt: str, chat_history_only: bool = False) -> str:
     logger.info("Assembling prompt with history")
@@ -22,7 +22,18 @@ def assemble_prompt_with_history(current_prompt: str, chat_history_only: bool = 
     else:
         chunk_history_str = assemble_chunks()
         logger.debug(f"Assembled chunk history (first 100 chars): {chunk_history_str[:100]}...")
-        assembled_prompt = f"{history_prompts_str}\n\nChunk History:\n{chunk_history_str}\n\nUser: {current_prompt}\nAssistant:"
+
+        # Add memory search results
+        memory_results = search_memories(current_prompt, top_k=3)
+        memory_str = "\n".join([f"Memory: {result['content']}" for result in memory_results])
+        logger.debug(f"Memory search results (first 100 chars): {memory_str[:100]}...")
+
+        # Add knowledge graph relations
+        kg_relations = get_related_nodes(current_prompt)
+        kg_str = "\n".join([f"Relation: {relation[0]} - {relation[1]} - {relation[2]}" for relation in kg_relations])
+        logger.debug(f"Knowledge graph relations (first 100 chars): {kg_str[:100]}...")
+
+        assembled_prompt = f"{history_prompts_str}\n\nChunk History:\n{chunk_history_str}\n\nRelevant Memories:\n{memory_str}\n\nKnowledge Graph Relations:\n{kg_str}\n\nUser: {current_prompt}\nAssistant:"
 
     logger.info(f"Final assembled prompt length: {len(assembled_prompt)} characters")
     return assembled_prompt

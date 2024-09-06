@@ -4,50 +4,53 @@ import os
 from pathlib import Path
 
 # User and Agent configuration
-# These settings define the names used for the user and AI agent in the system
 USER_NAME = os.getenv("AI_USER_NAME", "MikeBee")
 AGENT_NAME = os.getenv("AI_AGENT_NAME", "Otto")
 
 # Model configuration
-# Specify the default language model and embedding model to be used
 DEFAULT_MODEL = "llama3.1:latest"
 EMBEDDING_MODEL = os.getenv("AI_EMBEDDING_MODEL", "nomic-embed-text")
 
 # Memory configuration
-# These settings control how the system manages and processes memory
-MEMORY_LENGTH = int(os.getenv("AI_MEMORY_LENGTH", "15"))  # Number of interactions to keep in short-term memory
-CHUNK_SIZE = int(os.getenv("AI_CHUNK_SIZE", "5000"))  # Size of text chunks for processing
-CHUNK_OVERLAP = int(os.getenv("AI_CHUNK_OVERLAP", "200"))  # Overlap between chunks to maintain context
-CHUNK_LENGTH = int(os.getenv("AI_CHUNK_LENGTH", "10"))  # Number of chunks to keep in memory
+MEMORY_LENGTH = int(os.getenv("AI_MEMORY_LENGTH", "15"))
+CHUNK_SIZE = int(os.getenv("AI_CHUNK_SIZE", "5000"))
+CHUNK_OVERLAP = int(os.getenv("AI_CHUNK_OVERLAP", "200"))
+CHUNK_LENGTH = int(os.getenv("AI_CHUNK_LENGTH", "10"))
 
 # Path configuration
-# Define important directories and files used by the system
 PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / "data" / "json_history"
 EMBEDDINGS_DIR = DATA_DIR / "embeddings"
 
+# Edge Database configuration
+DB_DIR = PROJECT_ROOT / "data" / "edgebase"
+DB_FILE = "knowledge_edges.db"
+DB_PATH = DB_DIR / DB_FILE
+
 # Ensure directories exist
-# Create necessary directories if they don't already exist
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 EMBEDDINGS_DIR.mkdir(parents=True, exist_ok=True)
+DB_DIR.mkdir(parents=True, exist_ok=True)
 
 # File paths
-# Specify locations for important files
 CHAT_HISTORY_FILE = Path.home() / ".ollama_agents_chat_history.json"
 
 # Search configuration
-# Parameters for memory search functionality
-DEFAULT_TOP_K = int(os.getenv("AI_DEFAULT_TOP_K", "5"))  # Number of top results to return in memory search
-DEFAULT_SIMILARITY_THRESHOLD = float(os.getenv("AI_DEFAULT_SIMILARITY_THRESHOLD", "0.0"))  # Minimum similarity score for search results
+DEFAULT_TOP_K = int(os.getenv("AI_DEFAULT_TOP_K", "5"))
+DEFAULT_SIMILARITY_THRESHOLD = float(os.getenv("AI_DEFAULT_SIMILARITY_THRESHOLD", "0.0"))
 
 # Logging configuration
-# Settings for system logging
-LOG_LEVEL = os.getenv("AI_LOG_LEVEL", "WARNING")  # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-LOG_FILE = PROJECT_ROOT / "logs" / "ollama_agents.log"  # Path to log file
+LOG_LEVEL = os.getenv("AI_LOG_LEVEL", "WARNING")
+LOG_FILE = PROJECT_ROOT / "logs" / "ollama_agents.log"
 
 # Ensure log directory exists
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 # Assistant command configurations
 TERMINAL_APP = ["open", "-a", "Terminal"]
-DEFAULT_BROWSER = "default"  # or whatever default browser you prefer
+DEFAULT_BROWSER = "default"
+
+# Edge Database Settings
+EDGE_DB_VERSION = "1.0"
+EDGE_TABLE_NAME = "edges"
+EDGE_INDEX_PREFIX = "idx_"

@@ -2,11 +2,12 @@
 
 import sys
 import os
+import json
 from typing import List, Dict, Any, Optional
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -17,6 +18,47 @@ from src.modules.input import get_user_input
 from src.modules.cognitive_engine import process_query_and_generate_response
 from src.modules.meta_processes import debug_panel, print_step, print_result, print_error
 from src.modules.errors import ModelInferenceError, DataProcessingError, InputError
+from src.modules.agent_tools import (
+    analyze_user_input,
+    generate_response,
+    update_bullet_points,
+    interactive_followup,
+    generate_search_queries,
+    summarize_search_results,
+    evaluate_response,
+    generate_examples,
+    explain_concept,
+    generate_analogies,
+    fact_check
+)
+from src.modules.knowledge_management import (
+    classify_query_topic,
+    determine_research_depth,
+    process_query,
+    assess_source_credibility,
+    update_knowledge_base,
+    extract_key_concepts,
+    generate_follow_up_questions,
+    summarize_topic,
+    identify_knowledge_gaps,
+    compare_information,
+    validate_information,
+    generate_knowledge_tree,
+    evaluate_knowledge_consistency
+)
+from src.modules.context_management import (
+    gather_context,
+    update_context,
+    extract_key_information,
+    summarize_context,
+    identify_context_gaps,
+    prioritize_context,
+    merge_contexts,
+    filter_context,
+    expand_context,
+    generate_context_metadata,
+    adapt_context_to_user
+)
 from config import DEFAULT_MODEL, AGENT_NAME, USER_NAME
 
 console = Console()
@@ -28,16 +70,20 @@ class DebugAgent:
         self.conversation_history = []
         self.bullet_points = []
         self.ddg_search = DDGSearch()
+        self.knowledge_tree = {}
+        self.user_profile = {"expertise_level": "medium", "interests": [], "language_preference": "English"}
 
     @debug_panel
     def run(self):
-        print_result("Agent Initialization", f"🚀 {AGENT_NAME} initialized. I'm your advanced research assistant. Type '/q' to quit or '/help' for commands.")
+        print_result("Agent Initialization", f"🚀 {AGENT_NAME} initialized. I'm your debug AI assistant. Type '/q' to quit or '/help' for commands.")
 
         clear_history = Confirm.ask("Do you want to clear the chat history before starting?")
         if clear_history:
             chat_history.clear()
             self.conversation_history.clear()
             print_result("History Cleared", "🧹 Chat history cleared.")
+
+        self._setup_user_profile()
 
         while True:
             user_input = self.get_user_input()
@@ -49,7 +95,7 @@ class DebugAgent:
                 response = self.process_input(user_input)
             self.output_response(response)
 
-        print_result("Session End", f"👋 Thank you for using {AGENT_NAME}. Your research journey ends here. Goodbye!")
+        print_result("Session End", f"👋 Thank you for using {AGENT_NAME}. Your debug session has ended. Goodbye!")
 
     @debug_panel
     def get_user_input(self) -> Optional[str]:
@@ -70,6 +116,14 @@ class DebugAgent:
             return "🧹 Context and bullet points cleared."
         elif command == '/bullets':
             return self.display_bullet_points()
+        elif command == '/knowledge_tree':
+            return self.display_knowledge_tree()
+        elif command.startswith('/explain '):
+            return self.explain_concept_command(command[9:])
+        elif command.startswith('/fact_check '):
+            return self.fact_check_command(command[12:])
+        elif command == '/profile':
+            return self.display_user_profile()
         else:
             return f"❓ Unknown command: {command}. Type '/help' for available commands."
 
@@ -78,35 +132,62 @@ class DebugAgent:
         try:
             print_step("Starting cognitive processing")
 
-            result = process_query_and_generate_response(user_input, self.model_name, self.context, self.conversation_history, self.bullet_points, AGENT_NAME)
+            input_analysis = analyze_user_input(user_input, self.model_name)
+            print_result("Input Analysis", input_analysis)
 
-            if 'error' in result:
-                print_error(result['response'])
-                return result['response']
+            query_info = process_query(user_input, self.model_name)
+            print_result("Query Info", query_info)
 
-            self.context = result['context']
-            self.bullet_points = result['bullet_points']
+            self.context = gather_context(user_input, query_info['topic'], self.conversation_history, self.bullet_points, AGENT_NAME)
+            print_result("Gathered Context", self.context[:500] + "..." if len(self.context) > 500 else self.context)
 
-            print_result("Input Analysis", result['input_analysis'])
-            print_result("Query Info", f"Topic: {result['query_info']['topic']} (confidence: {result['query_info']['confidence']:.2f})\nResearch depth: {result['query_info']['depth']}/5")
-            print_result("Credibility", f"{result['credibility']:.2f}/1.00")
-            print_result("Key Concepts", ", ".join(result['key_concepts']))
-            print_result("Topic Summary", result['topic_summary'])
+            self.context = adapt_context_to_user(self.context, self.user_profile, self.model_name)
+            print_result("Adapted Context", self.context[:500] + "..." if len(self.context) > 500 else self.context)
 
-            self.conversation_history.append((user_input, result['response']))
-            chat_history.add_entry(user_input, result['response'])
+            research_depth = query_info['depth']
+            if research_depth > 1:
+                search_queries = generate_search_queries(user_input, self.model_name)
+                print_result("Generated Search Queries", search_queries)
 
-            # Handle follow-up questions
-            follow_up_questions = result.get('follow_up_questions', [])
-            if follow_up_questions:
-                print_result("Follow-up Questions", "\n".join(f"{i+1}. {q}" for i, q in enumerate(follow_up_questions)))
-                choice = console.input("Select a follow-up question (number) or press Enter to skip: ")
-                if choice.isdigit() and 1 <= int(choice) <= len(follow_up_questions):
-                    follow_up = follow_up_questions[int(choice) - 1]
-                    print_result("Selected Follow-up", follow_up)
-                    return self.process_input(follow_up)
+                search_results = [self.ddg_search.run_search(query) for query in search_queries]
+                print_result("Search Results", [str(result)[:200] + "..." if isinstance(result, list) else result[:200] + "..." for result in search_results])
 
-            return result['response']
+                summarized_results = summarize_search_results(sum(search_results, []), self.model_name)
+                print_result("Summarized Search Results", summarized_results)
+
+                self.context = update_context(self.context, summarized_results, self.model_name)
+                print_result("Updated Context", self.context[:500] + "..." if len(self.context) > 500 else self.context)
+
+            response = generate_response(user_input, self.context, input_analysis, AGENT_NAME, self.model_name)
+            print_result("Generated Response", response)
+
+            credibility = assess_source_credibility(response, self.model_name)
+            print_result("Credibility Score", f"{credibility:.2f}/1.00")
+
+            update_knowledge_base(response, query_info['topic'], self.model_name)
+            print_result("Knowledge Base Updated", "Knowledge base has been updated with the new information.")
+
+            new_bullets = update_bullet_points(response, self.model_name)
+            self.bullet_points.extend(new_bullets)
+            print_result("Updated Bullet Points", new_bullets)
+
+            key_concepts = extract_key_concepts(response, self.model_name)
+            print_result("Extracted Key Concepts", key_concepts)
+
+            self.update_knowledge_tree(query_info['topic'], key_concepts)
+            print_result("Updated Knowledge Tree", self.display_knowledge_tree())
+
+            topic_summary = summarize_topic(query_info['topic'], self.context, self.model_name)
+            print_result("Topic Summary", topic_summary)
+
+            self.conversation_history.append({"prompt": user_input, "response": response})
+            chat_history.add_entry(user_input, response)
+
+            followup = self.handle_followup(self.context)
+            if followup:
+                response += f"\n\n{followup}"
+
+            return response
 
         except Exception as e:
             logger.exception(f"Unexpected error in cognitive processing: {str(e)}")
@@ -128,7 +209,7 @@ class DebugAgent:
             indices = [int(i.strip()) - 1 for i in selection.split(',') if i.strip().isdigit()]
             relevant = [results[i] for i in indices if 0 <= i < len(results)]
 
-        self.context = self.update_context(self.context, "\n".join(relevant))
+        self.context = update_context(self.context, "\n".join(relevant), self.model_name)
         return f"✅ Added {len(relevant)} search results to the context."
 
     @debug_panel
@@ -138,8 +219,44 @@ class DebugAgent:
         return "📌 Current key points:\n" + "\n".join(f"• {point}" for point in self.bullet_points)
 
     @debug_panel
+    def display_knowledge_tree(self) -> str:
+        if not self.knowledge_tree:
+            return "Knowledge tree is empty."
+
+        # Convert sets to lists for JSON serialization
+        serializable_tree = {topic: list(concepts) for topic, concepts in self.knowledge_tree.items()}
+        return "🌳 Knowledge Tree:\n" + json.dumps(serializable_tree, indent=2)
+
+    @debug_panel
+    def explain_concept_command(self, concept: str) -> str:
+        explanation = explain_concept(concept, self.model_name, self.user_profile['expertise_level'])
+        analogies = generate_analogies(concept, self.model_name)
+        examples = generate_examples(concept, self.model_name)
+
+        response = f"Explanation of '{concept}':\n\n{explanation}\n\n"
+        response += "Analogies:\n" + "\n".join(f"• {analogy}" for analogy in analogies) + "\n\n"
+        response += "Examples:\n" + "\n".join(f"• {example}" for example in examples)
+
+        return response
+
+    @debug_panel
+    def fact_check_command(self, statement: str) -> str:
+        result = fact_check(statement, self.model_name)
+        response = f"Fact check for: '{statement}'\n\n"
+        response += f"Factual: {'Yes' if result['is_factual'] else 'No'}\n"
+        response += f"Confidence: {result['confidence']:.2f}\n"
+        response += f"Explanation: {result['explanation']}\n"
+        if result['sources']:
+            response += "Sources:\n" + "\n".join(f"• {source}" for source in result['sources'])
+        return response
+
+    @debug_panel
+    def display_user_profile(self) -> str:
+        return f"👤 User Profile:\n{json.dumps(self.user_profile, indent=2)}"
+
+    @debug_panel
     def output_response(self, response: str):
-        print_result(f"🤖 {AGENT_NAME}", Markdown(response))
+        print_result(f"🤖 {AGENT_NAME}", response)
 
     @debug_panel
     def get_help(self) -> str:
@@ -150,16 +267,40 @@ class DebugAgent:
         /context - Show current context
         /clear_context - Clear the current context and bullet points
         /bullets - Display current bullet points
+        /knowledge_tree - Display the knowledge tree
+        /explain <concept> - Get an explanation of a concept
+        /fact_check <statement> - Perform a fact check on a statement
+        /profile - Display your user profile
         /q or /quit or /exit - Exit the program
 
         For any other input, I'll conduct research and provide informative responses.
         """
 
     @debug_panel
-    def update_context(self, current_context: str, new_info: str) -> str:
-        # This is a placeholder for context updating logic
-        # In a real implementation, this might involve more sophisticated processing
-        return current_context + "\n" + new_info
+    def update_knowledge_tree(self, topic: str, concepts: List[str]):
+        if topic not in self.knowledge_tree:
+            self.knowledge_tree[topic] = set()
+        self.knowledge_tree[topic].update(concepts)
+
+    @debug_panel
+    def handle_followup(self, context: str) -> Optional[str]:
+        followup_questions = generate_follow_up_questions(context, self.model_name)
+        if followup_questions:
+            print_result("Follow-up Questions", "\n".join(f"{i+1}. {q}" for i, q in enumerate(followup_questions)))
+            choice = console.input("Select a follow-up question (number) or press Enter to skip: ")
+            if choice.isdigit() and 1 <= int(choice) <= len(followup_questions):
+                selected_question = followup_questions[int(choice) - 1]
+                return f"Follow-up question: {selected_question}\n\n{self.process_input(selected_question)}"
+        return None
+
+    @debug_panel
+    def _setup_user_profile(self):
+        print_step("Setting up user profile")
+        self.user_profile['expertise_level'] = Prompt.ask("What's your expertise level?", choices=['beginner', 'medium', 'expert'], default="medium")
+        interests = Prompt.ask("What are your main interests? (comma-separated)")
+        self.user_profile['interests'] = [interest.strip() for interest in interests.split(',')]
+        self.user_profile['language_preference'] = Prompt.ask("Preferred language", default="English")
+        print_result("User Profile", f"Profile set up: {self.user_profile}")
 
 @debug_panel
 def run():

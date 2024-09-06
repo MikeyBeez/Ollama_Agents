@@ -9,10 +9,10 @@ from rich.prompt import Prompt
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.modules.input import get_user_input
 from src.modules.banner import setup_console, print_welcome_banner, print_separator
 from src.modules.logging_setup import logger
 from src.modules.errors import OllamaAgentsError, ConfigurationError, InputError
+from config import AGENT_NAME
 
 console = Console()
 
@@ -62,12 +62,13 @@ def main():
                 if 0 <= agent_index < len(agents):
                     agent_name = agents[agent_index]
                     logger.info(f"User selected agent: {agent_name}")
+
                     agent_main = load_agent(agent_name)
                     if agent_main:
-                        logger.info(f"Starting agent: {agent_name}")
                         agent_main()
                     else:
                         raise ConfigurationError(f"No main function found in {agent_name}")
+
                 else:
                     raise InputError("Invalid agent selection.")
 

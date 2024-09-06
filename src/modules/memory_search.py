@@ -5,10 +5,12 @@ from numpy.linalg import norm
 import ollama
 import json
 from typing import List, Tuple, Dict, Any
+from pathlib import Path
 from config import DATA_DIR, EMBEDDINGS_DIR, EMBEDDING_MODEL, DEFAULT_MODEL
 from .file_utils import read_json_file, write_json_file, get_json_files_in_directory, increment_json_field
 from .logging_setup import logger
 from .ollama_client import process_prompt
+from .kb_graph import get_related_nodes, get_db_connection
 
 def read_memory(filename: str) -> Dict[str, Any]:
     file_path = DATA_DIR / filename
@@ -74,6 +76,8 @@ def find_most_similar(needle: List[float], haystack: List[List[float]]) -> List[
 
 def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.0) -> List[Dict[str, Any]]:
     logger.info(f"Searching memories for query: {query[:50]}...")  # Log only first 50 characters
+
+    # Embedding-based search
     memory_files = get_json_files_in_directory(DATA_DIR)
     embeddings = [get_embeddings(f.name) for f in memory_files]
     try:
@@ -81,7 +85,7 @@ def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.
         most_similar_files = find_most_similar(query_embedding, embeddings)
     except Exception as e:
         logger.error(f"Error generating query embedding: {str(e)}")
-        return []
+        most_similar_files = []
 
     relevant_memories = []
     for similarity, index in most_similar_files:
@@ -99,11 +103,44 @@ def search_memories(query: str, top_k: int = 5, similarity_threshold: float = 0.
             "timestamp": memory_data.get("timestamp", ""),
             "access_count": memory_data.get("access_count", 0),
             "permanent_marker": memory_data.get("permanent_marker", 0),
-            "filename": filename
+            "filename": filename,
+            "source": "embedding"
         })
 
-    logger.info(f"Found {len(relevant_memories)} relevant memories")
-    return relevant_memories
+    # Edge-based search
+    query_id = hash(query)  # Using a simple hash for demonstration; you might want a more robust method
+    edge_results = get_related_nodes(str(query_id))
+
+    for node_id, relationship_type, strength in edge_results:
+        if len(relevant_memories) >= top_k * 2:  # Allowing more results to combine later
+            break
+        memory_data = read_memory(f"{node_id}.json")
+        relevant_memories.append({
+            "content": memory_data.get("content", ""),
+            "type": memory_data.get("type", "unknown"),
+            "similarity": strength,  # Using edge strength as a proxy for similarity
+            "timestamp": memory_data.get("timestamp", ""),
+            "access_count": memory_data.get("access_count", 0),
+            "permanent_marker": memory_data.get("permanent_marker", 0),
+            "filename": f"{node_id}.json",
+            "source": "edge",
+            "relationship": relationship_type
+        })
+
+    # Combine and rank results
+    combined_results = sorted(relevant_memories, key=lambda x: x['similarity'], reverse=True)[:top_k]
+
+    logger.info(f"Found {len(combined_results)} relevant memories")
+    for result in combined_results:
+        content = result.get('content', '')
+        if isinstance(content, str):
+            logger.debug(f"Search result: {content[:100]}...")  # Log first 100 chars of each result
+        elif isinstance(content, dict):
+            logger.debug(f"Search result: {str(content)[:100]}...")  # Log first 100 chars of stringified dict
+        else:
+            logger.debug(f"Search result: {type(content)}")  # Log type if content is neither string nor dict
+
+    return combined_results
 
 def generate_embeddings_for_existing_files():
     memory_files = get_json_files_in_directory(DATA_DIR)
