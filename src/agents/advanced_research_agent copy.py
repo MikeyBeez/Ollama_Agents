@@ -1,7 +1,7 @@
 # src/agents/advanced_research_agent.py
 
+from typing import Dict, Any, List
 import json
-from typing import Dict, Any, List, Optional
 from src.modules.logging_setup import logger
 from src.modules.ddg_search import DDGSearch
 from src.modules.save_history import chat_history
@@ -25,36 +25,28 @@ class AdvancedResearchAgent:
         self.ddg_search = DDGSearch()
 
     def run(self):
-        console.print(f"[bold green]🚀 {AGENT_NAME} initialized. Type 'exit' to quit.[/bold green]")
+        console.print(f"[bold green]{AGENT_NAME} initialized. Type 'exit' to quit.[/bold green]")
 
         while True:
-            user_input = self._safe_get_user_input()
-            if user_input is None or user_input.lower() == 'exit':
+            user_input = get_user_input()
+            if user_input.lower() == 'exit':
                 break
 
             try:
                 response = self.process_input(user_input)
-                console.print(Panel(response, title=f"🤖 {AGENT_NAME}", border_style="magenta"))
+                console.print(f"[bold magenta]{AGENT_NAME}:[/bold magenta] {response}")
             except Exception as e:
                 logger.error(f"Error processing input: {str(e)}")
-                console.print(Panel(f"😕 I apologize, but an error occurred: {str(e)}", title="Error", border_style="red"))
+                console.print(f"[bold red]Error:[/bold red] {str(e)}")
 
-        console.print(f"[bold red]👋 {AGENT_NAME} shutting down. Goodbye![/bold red]")
-
-    def _safe_get_user_input(self) -> Optional[str]:
-        try:
-            return get_user_input()
-        except Exception as e:
-            logger.error(f"Error getting user input: {str(e)}")
-            console.print("[bold red]Error getting user input. Please try again.[/bold red]")
-            return None
+        console.print(f"[bold red]{AGENT_NAME} shutting down. Goodbye![/bold red]")
 
     def process_input(self, user_input: str) -> str:
         try:
             input_analysis = analyze_user_input(user_input, self.model_name)
             query_info = process_query(user_input, self.model_name)
 
-            self.context = self._safe_gather_context(user_input, query_info)
+            self.context = gather_context(user_input, query_info['topic'], self.conversation_history, self.bullet_points, AGENT_NAME)
 
             research_results = conduct_comprehensive_research(user_input, query_info['topic'], self.model_name)
             self.context = update_context(self.context, research_results, self.model_name)
@@ -74,36 +66,14 @@ class AdvancedResearchAgent:
             self.conversation_history.append((user_input, response))
             chat_history.add_entry(user_input, response)
 
-            self._display_research_summary(query_info, credibility, key_concepts, topic_summary)
-
             followup = interactive_followup(self.context, self.model_name, self.process_input)
             if followup != "No follow-up question selected.":
-                response += f"\n\n📌 Follow-up:\n{followup}"
+                response += f"\n\n{followup}"
 
             return response
         except Exception as e:
             logger.error(f"Error in process_input: {str(e)}")
-            return f"😕 I apologize, but an error occurred while processing your input: {str(e)}"
-
-    def _safe_gather_context(self, user_input: str, query_info: Dict[str, Any]) -> str:
-        try:
-            return gather_context(user_input, query_info['topic'], self.conversation_history, self.bullet_points, AGENT_NAME)
-        except Exception as e:
-            logger.error(f"Error gathering context: {str(e)}")
-            return f"Context gathering failed: {str(e)}"
-
-    def _display_research_summary(self, query_info: Dict[str, Any], credibility: float, key_concepts: List[str], topic_summary: str):
-        console.print(Panel(
-            f"[bold]🔍 Research Summary[/bold]\n\n"
-            f"📚 Topic: {query_info.get('topic', 'Unknown')}\n"
-            f"🎯 Research Depth: {query_info.get('depth', 0)}/5\n"
-            f"🌟 Credibility Score: {credibility:.2f}/1.00\n\n"
-            f"[bold]🗝️ Key Concepts:[/bold]\n" + "\n".join([f"• {concept}" for concept in key_concepts]) + "\n\n"
-            f"[bold]📝 Topic Summary:[/bold]\n{topic_summary}",
-            title="📊 Research Insights",
-            expand=False,
-            border_style="cyan"
-        ))
+            return f"I apologize, but an error occurred while processing your input: {str(e)}"
 
 def main():
     agent = AdvancedResearchAgent()
