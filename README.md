@@ -1,4 +1,3 @@
-```markdown
 # 🤖 Ollama_Agents: Your Advanced AI Assistant Builder with Graph Knowledgebase 🚀
 
 Welcome to Ollama_Agents! This repository allows you to create sophisticated AI agents using Ollama, featuring a unique graph-based knowledgebase. It's like having a high-tech AI laboratory with a built-in brain! 🧠✨
