@@ -86,17 +86,37 @@ def t_test(sample1: List[float], sample2: List[float]) -> Tuple[float, float]:
     return t_stat, p_value
 
 def chi_square_test(observed: List[int], expected: List[float]) -> Tuple[float, float]:
-    """
-    Perform a chi-square goodness-of-fit test.
-
-    Args:
-    observed (List[int]): Observed frequencies.
-    expected (List[float]): Expected frequencies.
-
-    Returns:
-    Tuple[float, float]: Chi-square statistic and p-value.
-    """
     if len(observed) != len(expected):
         raise ValueError("Observed and expected lists must be the same length.")
-
     return stats.chisquare(observed, expected)
+
+def calculate_basic_probability(favorable_outcomes: int, total_outcomes: int) -> float:
+    if total_outcomes == 0:
+        raise ValueError("Total outcomes cannot be zero")
+    return favorable_outcomes / total_outcomes
+
+def calculate_conditional_probability(joint_probability: float, condition_probability: float) -> float:
+    if condition_probability == 0:
+        raise ValueError("Condition probability cannot be zero")
+    return joint_probability / condition_probability
+
+def calculate_bayes_theorem(prior: float, likelihood: float, evidence: float) -> float:
+    if evidence == 0:
+        raise ValueError("Evidence probability cannot be zero")
+    return (likelihood * prior) / evidence
+
+def binomial_probability(n: int, k: int, p: float) -> float:
+    return stats.binom.pmf(k, n, p)
+
+def normal_probability(x: float, mean: float, std_dev: float) -> float:
+    return stats.norm.pdf(x, mean, std_dev)
+
+def poisson_probability(k: int, lambda_param: float) -> float:
+    return stats.poisson.pmf(k, lambda_param)
+
+def confidence_interval(data: List[float], confidence: float = 0.95) -> Tuple[float, float]:
+    n = len(data)
+    m = mean(data)
+    std_err = standard_deviation(data) / math.sqrt(n)
+    h = std_err * stats.t.ppf((1 + confidence) / 2, n - 1)
+    return m - h, m + h

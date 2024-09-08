@@ -2,18 +2,10 @@
 
 import unittest
 import math
-import sys
-import os
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
-from src.modules.helper_statistics import (
-    mean, median, mode, variance, standard_deviation,
-    covariance, correlation, z_score, percentile,
-    summary_statistics, t_test, chi_square_test
-)
+from src.modules.helper_statistics import *
 
 class TestHelperStatistics(unittest.TestCase):
+
     def test_mean(self):
         self.assertAlmostEqual(mean([1, 2, 3, 4, 5]), 3)
         self.assertAlmostEqual(mean([1.5, 2.5, 3.5]), 2.5)
@@ -48,11 +40,11 @@ class TestHelperStatistics(unittest.TestCase):
     def test_correlation(self):
         x = [1, 2, 3, 4, 5]
         y = [2, 4, 5, 4, 5]
-        self.assertAlmostEqual(correlation(x, y), 0.7745966692414834)
+        self.assertAlmostEqual(correlation(x, y), 0.7745966692414834, places=7)
 
     def test_z_score(self):
         data = [1, 2, 3, 4, 5]
-        self.assertAlmostEqual(z_score(4, data), 0.6324555320336759)
+        self.assertAlmostEqual(z_score(4, data), 0.6324555320336759, places=7)
 
     def test_percentile(self):
         data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -77,19 +69,41 @@ class TestHelperStatistics(unittest.TestCase):
         self.assertAlmostEqual(p_value, 0.09434977284243756, places=7)
 
     def test_chi_square_test(self):
-        # Example: Test of fairness of a die
-        # Observed frequencies of outcomes in 600 rolls
-        observed = [100, 90, 110, 95, 105, 100]
-        # Expected frequencies (fair die)
-        expected = [100, 100, 100, 100, 100, 100]
+        observed = [16, 18, 16, 14, 12, 12]
+        expected = [16, 16, 16, 16, 16, 8]
+        chi2, p_value = chi_square_test(observed, expected)
+        self.assertAlmostEqual(chi2, 3.5)
+        self.assertAlmostEqual(p_value, 0.6233876277495822, places=7)
 
-        chi_square, p_value = chi_square_test(observed, expected)
+    def test_calculate_basic_probability(self):
+        self.assertAlmostEqual(calculate_basic_probability(3, 10), 0.3)
+        with self.assertRaises(ValueError):
+            calculate_basic_probability(1, 0)
 
-        # Known chi-square value for this example (calculated manually)
-        expected_chi_square = 2.5
+    def test_calculate_conditional_probability(self):
+        self.assertAlmostEqual(calculate_conditional_probability(0.2, 0.5), 0.4)
+        with self.assertRaises(ValueError):
+            calculate_conditional_probability(0.1, 0)
 
-        self.assertAlmostEqual(chi_square, expected_chi_square, places=7)
-        self.assertGreater(p_value, 0.05)  # Not significant at 0.05 level
+    def test_calculate_bayes_theorem(self):
+        self.assertAlmostEqual(calculate_bayes_theorem(0.1, 0.8, 0.15), 0.5333333333333333)
+        with self.assertRaises(ValueError):
+            calculate_bayes_theorem(0.1, 0.8, 0)
+
+    def test_binomial_probability(self):
+        self.assertAlmostEqual(binomial_probability(10, 3, 0.5), 0.11718750000000006)
+
+    def test_normal_probability(self):
+        self.assertAlmostEqual(normal_probability(0, 0, 1), 0.3989422804014327)
+
+    def test_poisson_probability(self):
+        self.assertAlmostEqual(poisson_probability(5, 3), 0.10081881344492458)
+
+    def test_confidence_interval(self):
+        data = [1, 2, 3, 4, 5]
+        lower, upper = confidence_interval(data)
+        self.assertAlmostEqual(lower, 1.036756838522439, places=7)
+        self.assertAlmostEqual(upper, 4.963243161477561, places=7)
 
 if __name__ == '__main__':
     unittest.main()
