@@ -1,120 +1,81 @@
 # src/modules/helper_probabilistic.py
 
-from typing import Dict, List, Tuple
 import math
+import random
+from typing import List, Dict, Any, Tuple
+import numpy as np
+from scipy import stats
 
 def calculate_probability(favorable_outcomes: int, total_outcomes: int) -> float:
-    """
-    Calculate the probability of an event.
-
-    Args:
-    favorable_outcomes (int): Number of favorable outcomes.
-    total_outcomes (int): Total number of possible outcomes.
-
-    Returns:
-    float: Probability of the event.
-    """
+    """Calculate the probability of an event."""
     if total_outcomes == 0:
         raise ValueError("Total outcomes cannot be zero")
     return favorable_outcomes / total_outcomes
 
 def bayes_theorem(prior: float, likelihood: float, evidence: float) -> float:
-    """
-    Apply Bayes' theorem to calculate the posterior probability.
-
-    Args:
-    prior (float): Prior probability of the hypothesis.
-    likelihood (float): Probability of the evidence given the hypothesis.
-    evidence (float): Total probability of the evidence.
-
-    Returns:
-    float: Posterior probability of the hypothesis given the evidence.
-    """
+    """Apply Bayes' theorem to calculate the posterior probability."""
     if evidence == 0:
         raise ValueError("Evidence probability cannot be zero")
     return (likelihood * prior) / evidence
 
 def conditional_probability(joint_probability: float, condition_probability: float) -> float:
-    """
-    Calculate conditional probability.
-
-    Args:
-    joint_probability (float): Probability of both events occurring.
-    condition_probability (float): Probability of the condition.
-
-    Returns:
-    float: Conditional probability.
-    """
+    """Calculate conditional probability."""
     if condition_probability == 0:
         raise ValueError("Condition probability cannot be zero")
     return joint_probability / condition_probability
 
 def independent_events_probability(probabilities: List[float]) -> float:
-    """
-    Calculate the probability of independent events all occurring.
-
-    Args:
-    probabilities (List[float]): List of probabilities for each independent event.
-
-    Returns:
-    float: Probability of all events occurring.
-    """
+    """Calculate the probability of independent events all occurring."""
     return math.prod(probabilities)
 
 def mutually_exclusive_events_probability(probabilities: List[float]) -> float:
-    """
-    Calculate the probability of any of the mutually exclusive events occurring.
-
-    Args:
-    probabilities (List[float]): List of probabilities for each mutually exclusive event.
-
-    Returns:
-    float: Probability of any of the events occurring.
-    """
+    """Calculate the probability of any of the mutually exclusive events occurring."""
     return sum(probabilities)
 
 def update_probabilities(prior_probabilities: Dict[str, float], evidence: str,
                          likelihoods: Dict[str, float]) -> Dict[str, float]:
-    """
-    Update probabilities based on new evidence using Bayes' theorem.
-
-    Args:
-    prior_probabilities (Dict[str, float]): Prior probabilities for each hypothesis.
-    evidence (str): The observed evidence.
-    likelihoods (Dict[str, float]): Likelihood of the evidence for each hypothesis.
-
-    Returns:
-    Dict[str, float]: Updated probabilities for each hypothesis.
-    """
+    """Update probabilities based on new evidence using Bayes' theorem."""
     total_probability = sum(prior_probabilities[h] * likelihoods[h] for h in prior_probabilities)
-
     return {
         hypothesis: bayes_theorem(prior_probabilities[hypothesis], likelihoods[hypothesis], total_probability)
         for hypothesis in prior_probabilities
     }
 
 def entropy(probabilities: List[float]) -> float:
-    """
-    Calculate the entropy of a probability distribution.
-
-    Args:
-    probabilities (List[float]): List of probabilities.
-
-    Returns:
-    float: Entropy of the distribution.
-    """
+    """Calculate the entropy of a probability distribution."""
     return -sum(p * math.log2(p) for p in probabilities if p > 0)
 
 def information_gain(prior_entropy: float, posterior_entropies: List[Tuple[float, float]]) -> float:
-    """
-    Calculate the information gain.
-
-    Args:
-    prior_entropy (float): Entropy of the prior distribution.
-    posterior_entropies (List[Tuple[float, float]]): List of (probability, entropy) tuples for posterior distributions.
-
-    Returns:
-    float: Information gain.
-    """
+    """Calculate the information gain."""
     weighted_posterior_entropy = sum(prob * entropy for prob, entropy in posterior_entropies)
     return prior_entropy - weighted_posterior_entropy
+
+def binomial_probability(n: int, k: int, p: float) -> float:
+    """Calculate the binomial probability."""
+    return stats.binom.pmf(k, n, p)
+
+def normal_probability(x: float, mean: float, std_dev: float) -> float:
+    """Calculate the probability density for a normal distribution."""
+    return stats.norm.pdf(x, mean, std_dev)
+
+def poisson_probability(k: int, lambda_param: float) -> float:
+    """Calculate the Poisson probability."""
+    return stats.poisson.pmf(k, lambda_param)
+
+def confidence_interval(data: List[float], confidence: float = 0.95) -> Tuple[float, float]:
+    """Calculate the confidence interval for a dataset."""
+    return stats.t.interval(confidence, len(data)-1, loc=np.mean(data), scale=stats.sem(data))
+
+def monte_carlo_simulation(func: callable, num_simulations: int, **kwargs) -> List[float]:
+    """Perform a Monte Carlo simulation."""
+    return [func(**kwargs) for _ in range(num_simulations)]
+
+def probability_distribution_fit(data: List[float]) -> Tuple[str, Dict[str, float]]:
+    """Fit a probability distribution to the given data."""
+    distributions = [
+        stats.norm, stats.expon, stats.lognorm, stats.gamma, stats.beta
+    ]
+    best_fit = min(distributions, key=lambda dist: stats.kstest(data, dist.name, dist.fit(data)).statistic)
+    params = best_fit.fit(data)
+    param_names = best_fit.shapes.split(',') + ['loc', 'scale']
+    return best_fit.name, dict(zip(param_names, params))

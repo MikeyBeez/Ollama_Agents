@@ -3,6 +3,8 @@
 from typing import List, Dict, Any
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from src.modules.helper_probabilistic import bayes_theorem, calculate_probability, normal_probability
+import random
 
 def find_analogies(source_domain: str, target_domain: str, num_analogies: int = 3) -> List[Dict[str, Any]]:
     """
@@ -16,8 +18,6 @@ def find_analogies(source_domain: str, target_domain: str, num_analogies: int = 
     Returns:
     List[Dict[str, Any]]: A list of analogies, each containing the source concept, target concept, and similarity score.
     """
-    # In a real implementation, this would use more sophisticated NLP and knowledge base techniques
-    # For now, we'll use a simple TF-IDF and cosine similarity approach
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform([source_domain, target_domain])
 
@@ -83,7 +83,7 @@ def apply_analogy(source_problem: str, source_solution: str, target_problem: str
     target_problem (str): The problem in the target domain to solve.
 
     Returns:
-    Dict[str, Any]: A dictionary containing the proposed solution and confidence score.
+    Dict[str, Any]: A dictionary containing the proposed solution, confidence score, and probabilistic assessment.
     """
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform([source_problem, source_solution, target_problem])
@@ -113,9 +113,23 @@ def apply_analogy(source_problem: str, source_solution: str, target_problem: str
     proposed_solution = " ".join(proposed_solution_words)
     confidence = problem_similarity
 
+    # Probabilistic assessment
+    prior_probability = 0.5  # Assuming a neutral prior
+    likelihood = normal_probability(problem_similarity, 0.5, 0.2)  # Assuming a normal distribution
+    evidence = calculate_probability(len(set(source_problem_words) & set(target_problem_words)),
+                                     len(set(source_problem_words) | set(target_problem_words)))
+
+    posterior_probability = bayes_theorem(prior_probability, likelihood, evidence)
+
     return {
         "proposed_solution": proposed_solution,
-        "confidence": confidence
+        "confidence": confidence,
+        "probabilistic_assessment": {
+            "prior_probability": prior_probability,
+            "likelihood": likelihood,
+            "evidence": evidence,
+            "posterior_probability": posterior_probability
+        }
     }
 
 def evaluate_analogy(analogy: Dict[str, Any], context: str) -> Dict[str, Any]:
@@ -148,3 +162,56 @@ def evaluate_analogy(analogy: Dict[str, Any], context: str) -> Dict[str, Any]:
         "overall_relevance": overall_relevance,
         "applicability": applicability
     }
+
+def generate_analogy_chain(initial_domain: str, target_domain: str, steps: int = 3) -> List[Dict[str, Any]]:
+    """
+    Generate a chain of analogies from an initial domain to a target domain.
+
+    Args:
+    initial_domain (str): The starting domain.
+    target_domain (str): The final target domain.
+    steps (int): The number of intermediate steps in the analogy chain.
+
+    Returns:
+    List[Dict[str, Any]]: A list of analogies forming a chain from initial to target domain.
+    """
+    analogy_chain = []
+    current_domain = initial_domain
+
+    for i in range(steps):
+        next_domain = generate_intermediate_domain(current_domain, target_domain, (i + 1) / steps)
+        analogy = find_analogies(current_domain, next_domain, num_analogies=1)[0]
+        analogy_chain.append(analogy)
+        current_domain = next_domain
+
+    final_analogy = find_analogies(current_domain, target_domain, num_analogies=1)[0]
+    analogy_chain.append(final_analogy)
+
+    return analogy_chain
+
+def generate_intermediate_domain(domain1: str, domain2: str, interpolation: float) -> str:
+    """
+    Generate an intermediate domain between two domains.
+
+    Args:
+    domain1 (str): The first domain.
+    domain2 (str): The second domain.
+    interpolation (float): A value between 0 and 1 indicating how close the result should be to domain2.
+
+    Returns:
+    str: An intermediate domain.
+    """
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform([domain1, domain2])
+
+    words1 = domain1.split()
+    words2 = domain2.split()
+
+    intermediate_words = []
+    for i in range(min(len(words1), len(words2))):
+        if random.random() < interpolation:
+            intermediate_words.append(words2[i])
+        else:
+            intermediate_words.append(words1[i])
+
+    return " ".join(intermediate_words)
