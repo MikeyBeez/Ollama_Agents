@@ -1,3 +1,4 @@
+```markdown
 # 🤖 Ollama_Agents: Your Advanced AI Assistant Builder with Graph Knowledgebase 🚀
 
 Welcome to Ollama_Agents! This repository allows you to create sophisticated AI agents using Ollama, featuring a unique graph-based knowledgebase. It's like having a high-tech AI laboratory with a built-in brain! 🧠✨
@@ -13,10 +14,10 @@ Welcome to Ollama_Agents! This repository allows you to create sophisticated AI 
 - 🔀 Interactive follow-up question handling
 - 🎨 Rich, colorful command-line interface with progress tracking
 - 🛠️ Modular design with improved error handling and logging
-- 🔍 Advanced Analogy Finding: Discover insightful analogies to explain complex concepts
-- 🚦 Contradiction Detection and Resolution: Identify and resolve conflicting information
-- 🧪 Hypothesis Generation and Testing: Create and evaluate hypotheses based on available data
-- 🔗 Causal Reasoning: Infer and analyze cause-and-effect relationships
+
+## 🖥️ Development Environment
+
+This project is being developed on an M1 Mac Mini with 16GB of RAM, ensuring optimal performance for AI agent creation and testing.
 
 ## 🚀 Key Features
 
@@ -34,10 +35,6 @@ Welcome to Ollama_Agents! This repository allows you to create sophisticated AI 
 12. 🌳 Knowledge Tree: Dynamic generation and visualization of knowledge structures
 13. 🧐 Fact-Checking: Verify information and assess source credibility
 14. 👤 User Profiling: Adapt responses based on user expertise and interests
-15. 🔍 Advanced Analogy Finding: Discover insightful analogies to explain complex concepts
-16. 🚦 Contradiction Detection and Resolution: Identify and resolve conflicting information
-17. 🧪 Hypothesis Generation and Testing: Create and evaluate hypotheses based on available data
-18. 🔗 Causal Reasoning: Infer and analyze cause-and-effect relationships
 
 ## 💡 Why JSON-based Graph Knowledgebase?
 
@@ -109,7 +106,7 @@ python -m src.main
 
 ## 📘 Module Documentation
 
-Detailed documentation for each module can be found in the `docs/` directory:
+Detailed documentation for each module can be found in the `docs/` directory. This includes information on both standard and advanced (adv_) modules:
 
 ### Core Modules
 - [Input Module](docs/input_module.md)
@@ -118,16 +115,19 @@ Detailed documentation for each module can be found in the `docs/` directory:
 - [Banner Module](docs/banner_module.md)
 - [DuckDuckGo Search](docs/ddg_search_module.md)
 
+### Advanced (adv_) Modules
+- [Advanced Input Processor](docs/adv_input_processor.md)
+- [Advanced Context Manager](docs/adv_context_manager.md)
+- [Advanced Reasoning Engine](docs/adv_reasoning_engine.md)
+- [Advanced Planning Engine](docs/adv_planning_engine.md)
+- [Advanced Knowledge Manager](docs/adv_knowledge_manager.md)
+- [Advanced Output Manager](docs/adv_output_manager.md)
+
 ### Agent and Knowledge Management
 - [Agent Tools](docs/agent_tools.md)
 - [Knowledge Management](docs/knowledge_management.md)
 - [Context Management](docs/context_management.md)
 - [KB Graph](docs/kb_graph.md)
-
-### Reasoning and Analysis
-- [Causal Reasoning](docs/causal_reasoning.md)
-- [Hypothesis Testing](docs/hypothesis_testing.md)
-- [Research Tools](docs/research_tools.md)
 
 ### System Architecture and Configuration
 - [Architecture Guide](docs/architecture_guide.md)
@@ -157,64 +157,6 @@ Detailed documentation for each module can be found in the `docs/` directory:
 - `/explain <concept>`: Get an explanation of a concept
 - `/fact_check <statement>`: Perform a fact check on a statement
 - `/profile`: Display your user profile
-- `/graph`: Visualize the current state of the graph knowledgebase
-
-## 🕸️ Graph Knowledgebase
-
-Our graph knowledgebase is implemented in `src/modules/kb_graph.py`. It uses a JSON structure to represent nodes and edges, allowing for flexible and powerful knowledge representation. Key features include:
-
-- 📊 Efficient storage of relationships between concepts
-- 🔍 Fast querying of related information
-- 🧠 Dynamic updating of knowledge as the AI learns
-- 🌐 Easy integration with web search results and user interactions
-
-To interact with the graph knowledgebase, use the `/graph` command in the debug agent.
-
-## 🔍 Memory Search Commands
-
-- `/ms n m query`: Search memories and process query (short version, only shows answer)
-- `/msl n m query`: Search memories and process query (long version, shows memories and answer)
-  - `n`: Number of top results to retrieve
-  - `m`: Minimum similarity threshold (0-1)
-  - `query`: Your question or prompt
-  Example: `/ms 5 0.7 Who was Alan Turing?`
-
-## 🧵 Fabric Command
-
-Use the `/fabric` command to interact with Fabric patterns:
-
-1. Type `/fabric` in the chat interface.
-2. Select a pattern from the list provided.
-3. Enter the input text for the selected pattern.
-4. The AI will process your input using the chosen Fabric pattern and return the result.
-
-## 🎭 Multi-Agent System
-
-Our multi-agent system allows you to interact with different AI personalities:
-
-1. Run the main script: `python -m src.main`
-2. Choose the multi-agent option from the menu.
-3. Select an agent to chat with (e.g., Alice, Bob, or Charlie).
-4. Chat with the selected agent.
-5. Type 'back' to return to the agent selection menu.
-
-## 🛠️ Advanced Agent Tools
-
-Our `agent_tools.py` module now includes several advanced functions for sophisticated reasoning:
-
-- `find_analogies()`: Discovers insightful analogies to explain complex concepts
-- `detect_contradictions()`: Identifies conflicting information within a given dataset
-- `resolve_contradictions()`: Proposes resolutions for detected contradictions
-- `generate_hypotheses()`: Creates plausible hypotheses based on available data
-- `design_experiment()`: Outlines experimental procedures to test generated hypotheses
-- `infer_causal_relationships()`: Analyzes potential cause-and-effect relationships
-- `analyze_causal_chain()`: Examines the sequence of events in a causal chain
-
-These tools enable our agents to perform more nuanced and context-aware reasoning, leading to more insightful and comprehensive responses.
-
-## 🤖 Assistant Command
-
-The `/assistant` command provides various helpful functions. For details, see the [Assistant User Guide](docs/assistant_user_guide.md).
 
 ## 🤝 Contributing
 
