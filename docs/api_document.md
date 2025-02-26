@@ -4,6 +4,51 @@
 
 This document outlines the API for the Ollama_Agents framework, a system for creating and interacting with sophisticated AI agents using Ollama. The API provides programmatic access to the core functionality of the framework without needing to understand all implementation details.
 
+## Installation and Setup
+
+### Option 1: Install as a Package
+
+To use Ollama_Agents in your own project, you can install it as a package:
+
+```bash
+# From the root of the Ollama_Agents repository
+pip install -e .
+```
+
+This will install the package in development mode, allowing you to use it in other projects while still being able to modify the source code.
+
+### Option 2: Add to Python Path
+
+Alternatively, you can add the Ollama_Agents directory to your Python path:
+
+```bash
+# Add to PYTHONPATH temporarily
+export PYTHONPATH="/path/to/Ollama_Agents:$PYTHONPATH"
+
+# Or add to your shell profile for permanent access
+echo 'export PYTHONPATH="/path/to/Ollama_Agents:$PYTHONPATH"' >> ~/.bashrc  # or ~/.zshrc
+```
+
+### Dependencies
+
+Ensure all required dependencies are installed:
+
+```bash
+pip install -r /path/to/Ollama_Agents/requirements.txt
+```
+
+### Environment Configuration
+
+1. Create a `.env` file in your project directory or copy it from the Ollama_Agents repository
+2. Configure the necessary environment variables:
+
+```
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=llama2:13b
+EMBEDDING_MODEL=all-MiniLM-L6-v2
+LOG_LEVEL=INFO
+```
+
 ## Core API Classes
 
 ### AgentAPI
@@ -657,3 +702,100 @@ session_id = AgentAPI.create_session('research', config=config)
 ## Advanced Usage
 
 For advanced usage patterns and integration with other systems, please refer to the framework usage documentation.
+
+## Using the API in External Projects
+
+Here's a complete example of how to use the Ollama_Agents API in an external project:
+
+### Project Structure
+
+```
+Ollama_Experiments/
+├── .env
+├── requirements.txt
+└── experiment.py
+```
+
+### Example experiment.py
+
+```python
+import os
+import sys
+# Add Ollama_Agents to Python path if not installed as a package
+ollama_agents_path = "/path/to/Ollama_Agents"
+if ollama_agents_path not in sys.path:
+    sys.path.append(ollama_agents_path)
+
+from ollama_agents.api import AgentAPI, KnowledgeAPI, MemoryAPI
+
+def run_experiment():
+    # Initialize
+    print("Starting Ollama_Agents experiment...")
+    
+    # List available agents
+    agents = AgentAPI.list_agents()
+    print(f"Available agents: {agents}")
+    
+    # Create a session
+    session_id = AgentAPI.create_session('debug', {
+        "model": "llama2:13b",
+        "temperature": 0.7
+    })
+    
+    try:
+        # Use the agent
+        response = AgentAPI.get_response(session_id, "What is a knowledge graph?")
+        print(f"Response: {response['reply']}")
+        
+        # Add some knowledge
+        KnowledgeAPI.add_edge(
+            source="Knowledge Graph", 
+            target="Data Structure", 
+            relationship="is_a"
+        )
+        
+        # Execute a command
+        result = AgentAPI.execute_command(session_id, 'knowledge_tree', {
+            'concept': 'Knowledge Graph'
+        })
+        print("Knowledge tree result:", result)
+        
+    finally:
+        # Clean up
+        AgentAPI.terminate_session(session_id)
+        print("Experiment complete.")
+
+if __name__ == "__main__":
+    run_experiment()
+```
+
+### Running the Experiment
+
+1. Create a `.env` file with your configuration
+2. Install dependencies: `pip install -r /path/to/Ollama_Agents/requirements.txt`
+3. Run the experiment: `python experiment.py`
+
+## Troubleshooting
+
+### Common Issues
+
+1. **ImportError**: Ensure Ollama_Agents is properly added to your Python path or installed as a package
+2. **Module not found**: Check that all dependencies are installed
+3. **Connection error**: Make sure Ollama is running locally or the OLLAMA_HOST is correctly set
+4. **DB errors**: Ensure the necessary database files exist and are accessible
+
+### Logging
+
+Enable debug logging by setting `LOG_LEVEL=DEBUG` in your `.env` file or:
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
+### Getting Help
+
+If you encounter issues, check:
+1. The official documentation in the `/docs` directory
+2. Open issues on the GitHub repository
+3. Log files in the `/logs` directory
