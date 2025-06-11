@@ -166,8 +166,9 @@ class KnowledgeManager:
 
             cursor.execute(query, params)
             rows = cursor.fetchall()
-            return [
-                {
+            results = []
+            for row in rows:
+                edge = {
                     "source_id": row[0],
                     "target_id": row[1],
                     "relationship_type": row[2],
@@ -178,7 +179,11 @@ class KnowledgeManager:
                     "end_time": row[7],
                     "metadata": json.loads(row[8]) if row[8] else None
                 }
-                for row in rows
-            ]
+                results.append(edge)
+                if edge["bidirectional"]:
+                    reverse_edge = edge.copy()
+                    reverse_edge["source_id"], reverse_edge["target_id"] = edge["target_id"], edge["source_id"]
+                    results.append(reverse_edge)
+            return results
         except sqlite3.Error as e:
             raise DataProcessingError(f"Failed to search edges: {str(e)}")

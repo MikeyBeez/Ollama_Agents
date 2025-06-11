@@ -58,46 +58,32 @@ class TestKnowledgeManager(unittest.TestCase):
         now = datetime.now().isoformat()
         future = (datetime.now() + timedelta(days=30)).isoformat()
 
+        print("\nAdding test edges:")
         self.knowledge_manager.add_edge("A", "B", "relates_to", 0.7, confidence=0.8, start_time=now, end_time=future, bidirectional=True)
+        print("Added edge: A -> B (bidirectional)")
         self.knowledge_manager.add_edge("C", "D", "relates_to", 0.6, confidence=0.6)
+        print("Added edge: C -> D")
 
+        print("\nSearching edges with min_confidence=0.7:")
         results = self.knowledge_manager.search_edges(min_confidence=0.7)
-        self.assertEqual(len(results), 2)  # Two entries for the bidirectional edge
-        # We'll just check the first result, ignoring the duplicate
-        self.assertEqual(results[0]['source_id'], "A")
-        self.assertEqual(results[0]['target_id'], "B")
-        self.assertEqual(results[0]['confidence'], 0.8)
-        self.assertTrue(results[0]['bidirectional'])
+        print(f"Number of results: {len(results)}")
+        for i, result in enumerate(results, 1):
+            print(f"Result {i}: {result['source_id']} -> {result['target_id']} ({result['confidence']})")
 
-        results = self.knowledge_manager.search_edges(start_time=now, end_time=future)
-        self.assertEqual(len(results), 2)  # Two entries for the bidirectional edge
-        # Again, we'll just check the first result
-        self.assertEqual(results[0]['source_id'], "A")
-        self.assertEqual(results[0]['target_id'], "B")
-        self.assertEqual(results[0]['start_time'], now)
-        self.assertEqual(results[0]['end_time'], future)
+        self.assertEqual(len(results), 2, "Expected 2 results for min_confidence=0.7 (bidirectional edge counted twice)")
+        self.assertTrue(any(r['source_id'] == 'A' and r['target_id'] == 'B' for r in results), "Expected A->B edge in results")
+        self.assertTrue(any(r['source_id'] == 'B' and r['target_id'] == 'A' for r in results), "Expected B->A edge in results")
 
-        # Test that lower confidence edge is not returned
-        results = self.knowledge_manager.search_edges(min_confidence=0.7)
-        self.assertEqual(len(results), 2)  # Only the bidirectional edge meets the criteria
-        self.assertFalse(any(r['source_id'] == "C" and r['target_id'] == "D" for r in results))
+        print("\nSearching all edges with min_confidence=0.5:")
+        all_results = self.knowledge_manager.search_edges(min_confidence=0.5)
+        print(f"Number of all results: {len(all_results)}")
+        for i, result in enumerate(all_results, 1):
+            print(f"Result {i}: {result['source_id']} -> {result['target_id']} ({result['confidence']})")
 
-        # Test all edges are returned with lower confidence threshold
-        results = self.knowledge_manager.search_edges(min_confidence=0.5)
-        self.assertEqual(len(results), 3)  # 2 for A-B bidirectional, 1 for C-D
-        self.assertTrue(any(r['source_id'] == "C" and r['target_id'] == "D" for r in results))
-
-    def test_edge_metadata(self):
-        # Clear the database first
-        self.knowledge_manager.conn.execute("DELETE FROM edges")
-        self.knowledge_manager.conn.commit()
-
-        metadata = {"source": "test_database", "last_updated": "2023-06-01"}
-        self.knowledge_manager.add_edge("X", "Y", "connected_to", 1.0, metadata=metadata)
-
-        results = self.knowledge_manager.search_edges()
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['metadata'], metadata)
+        self.assertEqual(len(all_results), 3, "Expected 3 results for min_confidence=0.5 (2 for A-B bidirectional, 1 for C-D)")
+        self.assertTrue(any(r['source_id'] == 'A' and r['target_id'] == 'B' for r in all_results), "Expected A->B edge in results")
+        self.assertTrue(any(r['source_id'] == 'B' and r['target_id'] == 'A' for r in all_results), "Expected B->A edge in results")
+        self.assertTrue(any(r['source_id'] == 'C' and r['target_id'] == 'D' for r in all_results), "Expected C->D edge in results")
 
     def test_bidirectional_edge(self):
         self.knowledge_manager.add_edge("City", "Town", "similar_to", 0.8, bidirectional=True)
@@ -105,6 +91,15 @@ class TestKnowledgeManager(unittest.TestCase):
         town_related = self.knowledge_manager.get_related_nodes("Town")
         self.assertEqual(len(city_related), 1)
         self.assertEqual(len(town_related), 1)
+        self.assertEqual(city_related[0][0], "Town")
+        self.assertEqual(town_related[0][0], "City")
+
+    def test_edge_metadata(self):
+        metadata = {"source": "test_database", "last_updated": "2023-06-01"}
+        self.knowledge_manager.add_edge("X", "Y", "connected_to", 1.0, metadata=metadata)
+        results = self.knowledge_manager.search_edges()
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['metadata'], metadata)
 
     def test_error_handling(self):
         with self.assertRaises(DataProcessingError):

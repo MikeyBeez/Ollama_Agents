@@ -3,13 +3,13 @@
 import asyncio
 from typing import Optional
 from src.modules.config_manager import ConfigManager
-from src.modules.logging_setup import setup_logger
+from src.modules.logging_setup import logger
 from rich.console import Console
 
 class BaseAgent:
-    def __init__(self, config: ConfigManager):
-        self.config = config
-        self.logger = setup_logger(self.__class__.__name__)
+    def __init__(self, config: Optional[ConfigManager] = None):
+        self.config = config or ConfigManager()
+        self.logger = logger
         self.console = Console()
 
     async def run(self):
